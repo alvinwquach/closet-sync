@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User roles enum
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
+
+// Product condition enum
+enum Condition {
+  BRAND_NEW
+  TRIED_ON
+  NEW_WITH_DEFECTS
+  NEW_WITH_TAGS
+  NEW_WITHOUT_TAGS
+  USED
+  IN_BOX
+  NO_BOX
+}
+
+model User {
+  // Primary Key
+  id               Int       @id @default(autoincrement()) // Primary Key: id
+  email            String    @unique
+  password         String
+  role             Role      @default(USER)
+  // Relationships
+  products         Product[]           // One-to-many relationship: A user can have many products
+  favorites        Product[]           @relation("Favorites") // Many-to-many relationship: A user can favorite many products
+  viewedProducts   Product[]           @relation("ViewedProducts") // Many-to-many relationship: A user can view many products
+  searchHistory    SearchHistory[]      // One-to-many relationship: A user can have many search history records
+  createdAt       DateTime  @default(now())
+}
+
+model Product {
+  // Primary Key
+  id               Int       @id @default(autoincrement()) // Primary Key: id
+
+  title            String
+  description      String
+  price            Float
+  size             String
+  condition        Condition
+  createdAt       DateTime  @default(now())
+  listedAt        DateTime
+  soldAt          DateTime?
+  
+  // Foreign Key
+  sellerId        Int // Foreign Key: sellerId references User.id
+  seller          User      @relation(fields: [sellerId], references: [id]) // Relation: A product belongs to one seller (User)
+
+  // Relationships
+  favoritedBy     User[]    @relation("Favorites") // Many-to-many relationship: A product can be favorited by many users
+  viewedBy        User[]    @relation("ViewedProducts") // Many-to-many relationship: A product can be viewed by many users
+
+  // Relationship to track price history
+  priceHistory     PriceHistory[] // One-to-many relationship: A product can have many price history records
+}
+
+model PriceHistory {
+  // Primary Key
+  id         Int       @id @default(autoincrement()) // Primary Key: id
+
+  // Foreign Key
+  productId  Int // Foreign Key: productId references Product.id
+  price      Float
+  recordedAt DateTime  @default(now())
+
+  product    Product   @relation(fields: [productId], references: [id]) // Relation: Price history belongs to one product
+}
+
+model SearchHistory {
+  // Primary Key
+  id              Int       @id @default(autoincrement()) // Primary Key: id
+
+  // Foreign Key
+  userId          Int // Foreign Key: userId references User.id
+  searchTerm      String
+  user            User      @relation(fields: [userId], references: [id]) // Relation: Search history belongs to one user
+  createdAt      DateTime  @default(now())
+}
