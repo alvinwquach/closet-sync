@@ -1,94 +1,178 @@
 // This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Generator for Prisma Client
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js" // Generate Prisma Client
 }
 
+// Data source configuration
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql" // Using PostgreSQL as the database
+  url      = env("DATABASE_URL") // Database connection URL from environment variable
 }
 
-// User roles enum
+// Enum definitions
+// User roles available in the application
 enum Role {
-  ADMIN
-  MODERATOR
-  USER
+  ADMIN // Admin user with elevated permissions
+  MODERATOR // Moderator with limited administrative capabilities
+  USER // Regular user
 }
 
-// Product condition enum
+// Condition of products
 enum Condition {
-  BRAND_NEW
-  TRIED_ON
-  NEW_WITH_DEFECTS
-  NEW_WITH_TAGS
-  NEW_WITHOUT_TAGS
-  USED
-  IN_BOX
-  NO_BOX
+  BRAND_NEW // Product is brand new
+  TRIED_ON // Product has been tried on but not used
+  NEW_WITH_DEFECTS // New product with defects
+  NEW_WITH_TAGS // New product still with tags
+  NEW_WITHOUT_TAGS // New product without tags
+  USED // Used product
+  IN_BOX // Product is in its original box
+  NO_BOX // Product is without its box
 }
 
+// Types of raffles available
+enum RaffleType {
+  IN_APP // Raffle can be entered within the app
+  ONLINE // Raffle can be entered online
+  IN_STORE // Raffle can be entered in physical stores
+}
+
+// Possible statuses of a raffle
+enum RaffleStatus {
+  OPEN // Raffle is currently open for entries
+  CLOSED // Raffle has closed and is no longer accepting entries
+  CANCELED // Raffle has been canceled
+}
+
+// User model definition
 model User {
-  // Primary Key
-  id               Int       @id @default(autoincrement()) // Primary Key: id
-  email            String    @unique
-  password         String
-  role             Role      @default(USER)
+  id              Int            @id @default(autoincrement()) // Unique ID for the user
+  email           String         @unique // User's unique email for login
+  password        String         // User's password
+  role            Role           @default(USER) // Default user role assigned
+
   // Relationships
-  products         Product[]           // One-to-many relationship: A user can have many products
-  favorites        Product[]           @relation("Favorites") // Many-to-many relationship: A user can favorite many products
-  viewedProducts   Product[]           @relation("ViewedProducts") // Many-to-many relationship: A user can view many products
-  searchHistory    SearchHistory[]      // One-to-many relationship: A user can have many search history records
-  createdAt       DateTime  @default(now())
+  products        Product[]      // User's listed products
+  favorites       Product[]      @relation("Favorites") // Products favorited by the user
+  viewedProducts  Product[]      @relation("ViewedProducts") // Products viewed by the user
+  searchHistory   SearchHistory[] // User's search history
+  enteredRaffles  RaffleEntry[]  // Raffles the user has entered
+  createdAt       DateTime       @default(now()) // Timestamp of user creation
 }
 
+// Media model for storing product images/videos
+model Media {
+  id        Int      @id @default(autoincrement()) // Unique ID for media
+  url       String   // URL of the media file
+
+  // Foreign Key linking to Product
+  productId Int    // Product ID that this media belongs to
+  product   Product @relation(fields: [productId], references: [id]) // Relationship to Product
+}
+
+// Size model for product sizes
+model Size {
+  id        Int      @id @default(autoincrement()) // Unique ID for size
+  size      String   // Size value (e.g., "8", "9", "10")
+
+  // Many-to-Many relationship with Product
+  products  Product[] @relation("ProductSizes") // Products that include this size
+}
+
+// Product model definition
 model Product {
-  // Primary Key
-  id               Int       @id @default(autoincrement()) // Primary Key: id
+  id              Int            @id @default(autoincrement()) // Unique ID for product
+  title           String         // Title of the product
+  description     String         // Detailed description
+  price           Float          // Price of the product
+  size            String         // Size of the product
+  condition       Condition      // Condition of the product
+  createdAt       DateTime       @default(now()) // Creation timestamp
+  listedAt        DateTime       // Timestamp for when the product was listed
+  soldAt          DateTime?      // Optional timestamp for when the product was sold
+  releaseDate     DateTime?      // Optional release date for the product
 
-  title            String
-  description      String
-  price            Float
-  size             String
-  condition        Condition
-  createdAt       DateTime  @default(now())
-  listedAt        DateTime
-  soldAt          DateTime?
-  
-  // Foreign Key
-  sellerId        Int // Foreign Key: sellerId references User.id
-  seller          User      @relation(fields: [sellerId], references: [id]) // Relation: A product belongs to one seller (User)
+  // Foreign Key linking to User
+  sellerId        Int            // User ID of the seller
+  seller          User           @relation(fields: [sellerId], references: [id]) // Seller relationship
 
   // Relationships
-  favoritedBy     User[]    @relation("Favorites") // Many-to-many relationship: A product can be favorited by many users
-  viewedBy        User[]    @relation("ViewedProducts") // Many-to-many relationship: A product can be viewed by many users
+  favoritedBy     User[]         @relation("Favorites") // Users who favorited this product
+  viewedBy        User[]         @relation("ViewedProducts") // Users who viewed this product
+  priceHistory    PriceHistory[]  // Price history for the product
+  hasRaffle       Boolean        @default(false) // Indicates if a raffle is associated
+  raffles         Raffle[]       @relation // Raffles associated with the product
 
-  // Relationship to track price history
-  priceHistory     PriceHistory[] // One-to-many relationship: A product can have many price history records
+  // Media files related to the product
+  media           Media[]        // Multiple media files for the product
+
+  // Optional Foreign Key for Country
+  countryId       Int?           // Country ID (if applicable)
+  country         Country?       @relation(fields: [countryId], references: [id]) // Relationship to Country
+
+  // Many-to-Many relationship with Size
+  sizes           Size[]         @relation("ProductSizes") // Sizes associated with this product
 }
 
+// PriceHistory model for tracking product price changes
 model PriceHistory {
-  // Primary Key
-  id         Int       @id @default(autoincrement()) // Primary Key: id
+  id              Int            @id @default(autoincrement()) // Unique ID for price history entry
 
-  // Foreign Key
-  productId  Int // Foreign Key: productId references Product.id
-  price      Float
-  recordedAt DateTime  @default(now())
+  // Foreign Key linking to Product
+  productId       Int            // Product ID that this price history entry belongs to
+  price           Float          // Recorded price
+  recordedAt      DateTime       @default(now()) // Timestamp for when the price was recorded
 
-  product    Product   @relation(fields: [productId], references: [id]) // Relation: Price history belongs to one product
+  // Relationship to Product
+  product         Product        @relation(fields: [productId], references: [id]) // Link to Product
 }
 
+// SearchHistory model for tracking user search terms
 model SearchHistory {
-  // Primary Key
-  id              Int       @id @default(autoincrement()) // Primary Key: id
+  id              Int            @id @default(autoincrement()) // Unique ID for search history entry
 
-  // Foreign Key
-  userId          Int // Foreign Key: userId references User.id
-  searchTerm      String
-  user            User      @relation(fields: [userId], references: [id]) // Relation: Search history belongs to one user
-  createdAt      DateTime  @default(now())
+  // Foreign Key linking to User
+  userId          Int            // User ID that this search term belongs to
+  searchTerm      String         // The search term entered by the user
+  user            User           @relation(fields: [userId], references: [id]) // Link to User
+  createdAt       DateTime       @default(now()) // Timestamp of the search
+}
+
+// Raffle model definition for raffles linked to products
+model Raffle {
+  id              Int            @id @default(autoincrement()) // Unique ID for raffle
+  productId       Int            // Product ID associated with the raffle
+  closingTime     DateTime       // Time when the raffle closes
+  releaseDate     DateTime       // Release date for the raffle
+  type            RaffleType     // Type of the raffle
+  link            String?        // Link for online or in-store raffles (optional)
+
+  // Relationship to Product
+  product         Product        @relation(fields: [productId], references: [id]) // Link to Product
+
+  // Relationship to RaffleEntry
+  entries         RaffleEntry[]  @relation("RaffleEntries") // Entries in the raffle
+  status          RaffleStatus    // Current status of the raffle
+}
+
+// RaffleEntry model to track user entries in raffles
+model RaffleEntry {
+  id              Int            @id @default(autoincrement()) // Unique ID for raffle entry
+
+  // Foreign Keys linking to User and Raffle
+  userId          Int            // User ID of the entrant
+  raffleId        Int            // Raffle ID that this entry is for
+
+  user            User           @relation(fields: [userId], references: [id]) // Link to User
+  raffle          Raffle         @relation("RaffleEntries", fields: [raffleId], references: [id]) // Link to Raffle
+  enteredAt       DateTime       @default(now()) // Timestamp when the user entered the raffle
+}
+
+// Country model to represent countries
+model Country {
+  id              Int            @id @default(autoincrement()) // Unique ID for country
+  name            String         @unique // Unique name of the country
+  products        Product[]      // Products available in this country
 }
