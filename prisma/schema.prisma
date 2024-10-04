@@ -202,8 +202,8 @@ model Product {
   engagementMetrics EngagementMetric[] // Metrics tracking user engagement with the product
   tags             ProductTag[]       // Tags associated with the product for categorization
   variants         ProductVariant[]    // Variants of the product (e.g., different sizes or colors)
+  bundles      BundleProduct[] // List of bundles that this product belongs to
 }
-
 
 // Country model
 model Country {
@@ -373,7 +373,6 @@ model Post {
   engagementMetrics EngagementMetric[] // Relationship to EngagementMetric
 }
 
-
 // Post Reaction model for reactions on user posts
 model PostReaction {
   id        Int     @id @default(autoincrement())
@@ -535,62 +534,83 @@ model EngagementMetric {
 
 // Moderation Report model for tracking user reports on content
 model ModerationReport {
-  id            Int      @id @default(autoincrement()) // Unique ID for the report
-  reportedById  Int      // User who reported the issue
+  id            Int      @id @default(autoincrement()) // Unique ID for each report
+  reportedById  Int      // ID of the user who reported the issue
   targetId      Int      // ID of the target (user, product, etc.) being reported
-  reason        String    // Reason for the report
+  reason        String    // Description of the reason for the report
   status        String    // Current status of the report (e.g., "pending", "resolved")
   createdAt     DateTime @default(now()) // Timestamp when the report was created
   updatedAt     DateTime @updatedAt // Timestamp when the report was last updated
-  reportedBy    User     @relation(fields: [reportedById], references: [id]) // Link to User who reported
+  reportedBy    User     @relation(fields: [reportedById], references: [id]) // Relationship to the User who reported
 }
 
 // Product Variant model for handling different variants of a product (like size and color)
 model ProductVariant {
-  id        Int           @id @default(autoincrement()) // Unique ID for the product variant
-  productId Int           // Foreign key to Product
-  size      String        // Example variant field (e.g., size)
-  color     String        // Example variant field (e.g., color)
-  inventories Inventory[]  @relation("VariantInventories") // Relationship to Inventory
-  product   Product       @relation(fields: [productId], references: [id]) // Link to Product
+  id        Int           @id @default(autoincrement()) // Unique ID for each product variant
+  productId Int           // Foreign key linking to the Product
+  size      String        // Size of the product variant (e.g., "M", "L")
+  color     String        // Color of the product variant (e.g., "Red", "Blue")
+  inventories Inventory[]  @relation("VariantInventories") // List of inventories for this variant
+  product   Product       @relation(fields: [productId], references: [id]) // Relationship to the Product
 }
 
 // Inventory model for tracking stock levels of product variants
 model Inventory {
-  id        Int           @id @default(autoincrement()) // Unique ID for the inventory entry
-  variantId Int           // Foreign key linking to the product variant
-  quantity  Int           // Number of items in stock for the variant
+  id        Int           @id @default(autoincrement()) // Unique ID for each inventory entry
+  variantId Int           // Foreign key linking to the ProductVariant
+  quantity  Int           // Number of items in stock for this variant
   createdAt DateTime      @default(now()) // Timestamp when the inventory entry was created
   updatedAt DateTime      @updatedAt // Timestamp when the inventory entry was last updated
-  variant   ProductVariant @relation("VariantInventories", fields: [variantId], references: [id]) // Link to ProductVariant
+  variant   ProductVariant @relation("VariantInventories", fields: [variantId], references: [id]) // Relationship to ProductVariant
 }
 
+// Achievement model for tracking achievements that users can earn
 model Achievement {
   id          Int         @id @default(autoincrement()) // Unique ID for the achievement
   name        String      // Name of the achievement
-  description String      // Description of the achievement
-  criteria    Json        // JSON object to define the criteria for earning the achievement
-  createdAt   DateTime    @default(now()) // Timestamp of when the achievement was created
+  description String      // Description of what the achievement entails
+  criteria    Json        // JSON object defining the criteria for earning the achievement
+  createdAt   DateTime    @default(now()) // Timestamp when the achievement was created
   userAchievements UserAchievement[] // Relationships for user achievements
 }
 
+// User Achievement model for linking users with the achievements they have earned
 model UserAchievement {
   id            Int         @id @default(autoincrement()) // Unique ID for the user achievement entry
-  userId        Int         // User ID who earned the achievement
-  achievementId Int         // Achievement ID that this entry relates to
+  userId        Int         // ID of the user who earned the achievement
+  achievementId Int         // ID of the achievement that this entry relates to
   createdAt     DateTime    @default(now()) // Timestamp of when the achievement was earned
-  // Relationships to User and Achievement
-  user          User        @relation(fields: [userId], references: [id]) // Link to User
-  achievement   Achievement  @relation(fields: [achievementId], references: [id]) // Link to Achievement
+  user          User        @relation(fields: [userId], references: [id]) // Link to the User
+  achievement   Achievement  @relation(fields: [achievementId], references: [id]) // Link to the Achievement
 }
 
+// Leaderboard model for tracking user scores and rankings
 model Leaderboard {
-  id           Int        @id @default(autoincrement()) // Unique ID for the leaderboard entry
-  userId       Int        // User ID of the leaderboard participant
-  score        Int        // Score based on various metrics (sales, reviews, etc.)
-  createdAt    DateTime   @default(now()) // Timestamp of when the entry was created
-  updatedAt    DateTime   @updatedAt // Timestamp of when the entry was last updated
-  // Relationship to User
-  user         User       @relation(fields: [userId], references: [id]) // Link to User
+  id           Int        @id @default(autoincrement()) // Unique ID for each leaderboard entry
+  userId       Int        // ID of the user participating in the leaderboard
+  score        Int        // Score based on various metrics (e.g., sales, reviews, etc.)
+  createdAt    DateTime   @default(now()) // Timestamp when the entry was created
+  updatedAt    DateTime   @updatedAt // Timestamp when the entry was last updated
+  user         User       @relation(fields: [userId], references: [id]) // Link to the User
 }
 
+// Represents a collection of products sold together as a bundle
+model Bundle {
+  id          Int      @id @default(autoincrement()) // Unique ID for each bundle
+  name        String   // The name of the bundle
+  description String?  // Optional description of the bundle
+  price       Float    // Total price of the bundle
+  createdAt   DateTime @default(now()) // Timestamp when the bundle was created
+  updatedAt   DateTime @updatedAt // Timestamp when the bundle was last updated
+  products    BundleProduct[] // List of products included in this bundle
+}
+
+// Represents the relationship between bundles and individual products
+model BundleProduct {
+  id       Int     @id @default(autoincrement()) // Unique ID for each bundle-product relationship
+  bundleId Int     // ID of the associated bundle
+  productId Int    // ID of the associated product
+  quantity Int     // Number of this product included in the bundle
+  bundle   Bundle  @relation(fields: [bundleId], references: [id]) // Link to the Bundle
+  product  Product @relation(fields: [productId], references: [id]) // Link to the Product
+}
