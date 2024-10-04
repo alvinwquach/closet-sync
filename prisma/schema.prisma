@@ -61,49 +61,51 @@ enum ReactionType {
 
 // User Management
 model User {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  password         String
-  role             Role              @default(USER)
-  username         String            @unique
-  products         Product[]
-  favorites        Product[]         @relation("Favorites")
-  viewedProducts   Product[]         @relation("ViewedProducts")
-  searchHistory    SearchHistory[]
-  enteredRaffles   RaffleEntry[]
-  notifications    Notification[]
-  ratingsGiven     UserRating[]      @relation("RatingsGiven")
-  ratingsReceived  UserRating[]      @relation("RatingsReceived")
-  createdAt        DateTime          @default(now())
-  profilePicture   String?
-  bio              String?
-  location         String?
-  lastActive       DateTime?
-  sentMessages     Message[]         @relation("Sender")
-  receivedMessages Message[]         @relation("Receiver")
-  reactions        MessageReaction[]
-  wishlist         Wishlist[]
-  reviews          Review[]
-  feedback         Feedback[]
-  searchFilter     SearchFilter[]
-  savedSearch      SavedSearch[]
-  report           Report[]
-  userActivity     UserActivity[]    // Add this line for the opposite relation
-  userPreferences  UserPreference[]
-  moderationReports ModerationReport[]
-  engagementMetrics EngagementMetric[]
-  following        UserFollow[]      @relation("UserFollows")
-  followers        UserFollow[]      @relation("UserFollowedBy")
-  threads          Thread[]
-  posts            Post[]
-  postReactions    PostReaction[]    @relation("UserPostReactions")
-  polls            Poll[]
-  pollVotes        PollVote[]
-  userBadges       UserBadge[]
-  supportTickets   SupportTicket[]
-  comments         Comment[]
-  productRating    ProductRating[]
-  language         Language[]
+  id               Int               @id @default(autoincrement()) // Unique identifier for each user
+  email            String            @unique // User's email address (must be unique)
+  password         String            // User's password (hashed for security)
+  role             Role              @default(USER) // Role of the user (e.g., admin, regular user)
+  username         String            @unique // Unique username for the user
+  products         Product[]         // Products listed by the user
+  favorites        Product[]         @relation("Favorites") // Products favorited by the user
+  viewedProducts   Product[]         @relation("ViewedProducts") // Products viewed by the user
+  searchHistory    SearchHistory[]    // User's search history
+  enteredRaffles   RaffleEntry[]      // Raffles the user has entered
+  notifications    Notification[]     // Notifications sent to the user
+  ratingsGiven     UserRating[]      @relation("RatingsGiven") // Ratings given by the user to products
+  ratingsReceived  UserRating[]      @relation("RatingsReceived") // Ratings received by the user for their products
+  createdAt        DateTime          @default(now()) // Timestamp for when the user account was created
+  profilePicture   String?           // URL to the user's profile picture (optional)
+  bio              String?           // Short biography or description of the user (optional)
+  location         String?           // User's location (optional)
+  lastActive       DateTime?         // Timestamp for the user's last activity (optional)
+  sentMessages     Message[]         @relation("Sender") // Messages sent by the user
+  receivedMessages Message[]         @relation("Receiver") // Messages received by the user
+  reactions        MessageReaction[]  // Reactions the user has given to messages
+  wishlist         Wishlist[]        // Wishlist of products the user is interested in
+  reviews          Review[]          // Reviews written by the user for products
+  feedback         Feedback[]        // Feedback provided by the user
+  searchFilter     SearchFilter[]    // Filters used by the user during product searches
+  savedSearch      SavedSearch[]     // Saved searches by the user for easy access
+  report           Report[]          // Reports made by the user
+  userActivity     UserActivity[]    // Records of the user's activity on the platform
+  userPreferences  UserPreference[]  // User preferences for platform settings
+  moderationReports ModerationReport[] // Reports made by the user regarding moderation
+  engagementMetrics EngagementMetric[] // Metrics tracking the user's engagement on the platform
+  following        UserFollow[]      @relation("UserFollows") // Users that this user follows
+  followers        UserFollow[]      @relation("UserFollowedBy") // Users that follow this user
+  threads          Thread[]          // Threads started by the user in discussions
+  posts            Post[]            // Posts made by the user
+  postReactions    PostReaction[]    @relation("UserPostReactions") // Reactions to posts made by this user
+  polls            Poll[]            // Polls created by the user
+  pollVotes        PollVote[]        // Votes cast by the user in polls
+  userBadges       UserBadge[]      // Badges earned by the user for achievements
+  supportTickets   SupportTicket[]   // Support tickets submitted by the user
+  comments         Comment[]         // Comments made by the user on various content
+  productRating    ProductRating[]   // Ratings given to products by this user
+  language         Language[]        // Languages spoken by the user
+  userAchievements  UserAchievement[] // Achievements earned by the user
+  leaderboards      Leaderboard[]     // Leaderboard entries for the user
 }
 
 // User Follow model for follow relationships
@@ -171,37 +173,35 @@ model Notification {
 
 // Product Management
 model Product {
-  id           Int             @id @default(autoincrement())
-  title        String
-  description  String
-  price        Float
-  condition    Condition
-  createdAt    DateTime        @default(now())
-  listedAt     DateTime
-  soldAt       DateTime?
-  releaseDate  DateTime?
-  sellerId     Int
-  seller       User            @relation(fields: [sellerId], references: [id])
-  favoritedBy  User[]          @relation("Favorites")
-  viewedBy     User[]          @relation("ViewedProducts")
-  priceHistory PriceHistory[]
-  hasRaffle    Boolean         @default(false)
-  raffles      Raffle[]        @relation
-  media        Media[]
-  countryId    Int?
-  country      Country?        @relation(fields: [countryId], references: [id])
-  brandId      Int?
-  brand        Brand?          @relation(fields: [brandId], references: [id])
-  ratings      ProductRating[]
-  reports      Report[]
-  comments     Comment[]
-  wishlistedBy Wishlist[]
-  reviews      Review[]
-
-  // New fields
-  engagementMetrics EngagementMetric[] // New relationship
-  tags             ProductTag[]       // New relationship
-  variants         ProductVariant[]    // New relationship
+  id           Int             @id @default(autoincrement()) // Unique identifier for each product
+  title        String          // The title or name of the product
+  description  String          // A detailed description of the product
+  price        Float           // The price of the product
+  condition    Condition       // The condition of the product (e.g., new, used)
+  createdAt    DateTime        @default(now()) // Timestamp for when the product was created
+  listedAt     DateTime        // Timestamp for when the product was listed for sale
+  soldAt       DateTime?       // Optional timestamp for when the product was sold
+  releaseDate  DateTime?       // Optional release date for the product
+  sellerId     Int             // ID of the user who is selling the product
+  seller       User            @relation(fields: [sellerId], references: [id]) // Relationship to the seller user
+  favoritedBy  User[]          @relation("Favorites") // Users who have favorited this product
+  viewedBy     User[]          @relation("ViewedProducts") // Users who have viewed this product
+  priceHistory PriceHistory[]   // History of price changes for the product
+  hasRaffle    Boolean         @default(false) // Indicates if there is a raffle associated with the product
+  raffles      Raffle[]        @relation // Relationship to any raffles for this product
+  media        Media[]         // Media files (images, videos) associated with the product
+  countryId    Int?            // Optional ID of the country where the product is listed
+  country      Country?        @relation(fields: [countryId], references: [id]) // Relationship to the country
+  brandId      Int?            // Optional ID of the brand associated with the product
+  brand        Brand?          @relation(fields: [brandId], references: [id]) // Relationship to the brand
+  ratings      ProductRating[]  // User ratings for the product
+  reports      Report[]        // Reports related to the product (e.g., for inappropriate content)
+  comments     Comment[]       // Comments made by users on the product
+  wishlistedBy Wishlist[]      // Users who have added this product to their wishlist
+  reviews      Review[]        // Reviews provided by users for the product
+  engagementMetrics EngagementMetric[] // Metrics tracking user engagement with the product
+  tags             ProductTag[]       // Tags associated with the product for categorization
+  variants         ProductVariant[]    // Variants of the product (e.g., different sizes or colors)
 }
 
 
@@ -564,3 +564,33 @@ model Inventory {
   updatedAt DateTime      @updatedAt // Timestamp when the inventory entry was last updated
   variant   ProductVariant @relation("VariantInventories", fields: [variantId], references: [id]) // Link to ProductVariant
 }
+
+model Achievement {
+  id          Int         @id @default(autoincrement()) // Unique ID for the achievement
+  name        String      // Name of the achievement
+  description String      // Description of the achievement
+  criteria    Json        // JSON object to define the criteria for earning the achievement
+  createdAt   DateTime    @default(now()) // Timestamp of when the achievement was created
+  userAchievements UserAchievement[] // Relationships for user achievements
+}
+
+model UserAchievement {
+  id            Int         @id @default(autoincrement()) // Unique ID for the user achievement entry
+  userId        Int         // User ID who earned the achievement
+  achievementId Int         // Achievement ID that this entry relates to
+  createdAt     DateTime    @default(now()) // Timestamp of when the achievement was earned
+  // Relationships to User and Achievement
+  user          User        @relation(fields: [userId], references: [id]) // Link to User
+  achievement   Achievement  @relation(fields: [achievementId], references: [id]) // Link to Achievement
+}
+
+model Leaderboard {
+  id           Int        @id @default(autoincrement()) // Unique ID for the leaderboard entry
+  userId       Int        // User ID of the leaderboard participant
+  score        Int        // Score based on various metrics (sales, reviews, etc.)
+  createdAt    DateTime   @default(now()) // Timestamp of when the entry was created
+  updatedAt    DateTime   @updatedAt // Timestamp of when the entry was last updated
+  // Relationship to User
+  user         User       @relation(fields: [userId], references: [id]) // Link to User
+}
+
