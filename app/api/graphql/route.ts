@@ -488,6 +488,20 @@ const { handleRequest } = createYoga({
         user: User! # User information. The User object must be non-null.
       }
 
+      type Tag {
+        id: Int! # Unique ID for the tag. Int is a signed 32-bit integer.
+        name: String! # Name of the tag. String is a UTF-8 character sequence.
+        products: [ProductTag!]! # List of ProductTag relationships associated with the tag. This list cannot be null, and each ProductTag must also be non-null.
+      }
+
+      type ProductTag {
+        id: Int! # Unique ID for the product-tag relationship. Int is a signed 32-bit integer.
+        productId: Int! # Foreign key to Product. Int is a signed 32-bit integer.
+        tagId: Int! # Foreign key to Tag. Int is a signed 32-bit integer.
+        product: Product! # Associated Product object. Product must be non-null.
+        tag: Tag! # Associated Tag object. Tag must be non-null.
+      }
+
       type EngagementMetric {
         id: Int! # Unique metric ID. Int is a signed 32-bit integer.
         userId: Int! # ID of the user. Int is a signed 32-bit integer.
