@@ -293,6 +293,7 @@ model Report {
   user        User     @relation(fields: [userId], references: [id]) // Link to User
   product     Product  @relation(fields: [productId], references: [id]) // Link to Product
 }
+
 // Message model for direct user messaging
 model Message {
   id         Int               @id @default(autoincrement()) // Unique ID for message
