@@ -593,8 +593,8 @@ const { handleRequest } = createYoga({
       Date: dateScalar,
       DateTime: dateTimeScalar,
       JSON: GraphQLJSON,
-      Query: {},
-      Mutation: {},
+      // Query: {},
+      // Mutation: {},
     },
   }),
 
