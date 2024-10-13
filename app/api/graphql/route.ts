@@ -622,8 +622,11 @@ const { handleRequest } = createYoga({
         getAdminUsers: [User!]! # Fetches all users with the admin role.
         getModeratorUsers: [User!]! # Fetches all users with the moderator role.
         getRegularUsers: [User!]! # Fetches all users with the regular user role.
+        getUserRoles(userId: Int!): [Role!]! # Fetches the role of a specific user.
+        getUsersByRole(role: Role!): [User!]! # Fetches all users with the specified role.
         # User Activity and Status
         getActiveUsers: [User!]! # Fetches all active users.
+        getUserRoleStatistics: [[String]]! # Fetches user role statistics as an array of arrays
         getUserBadges(userId: Int!): [UserBadge!]! # Fetches all badges earned by a specific user.
         getUserAchievements(userId: Int!): [UserAchievement!]! # Fetches all achievements earned by a specific user.
         # Notifications
@@ -798,104 +801,170 @@ const { handleRequest } = createYoga({
             include: { followed: true }, // Include followed user details
           });
         },
-      },
 
-      // Fetches all languages spoken by a specific user.
-      // SQL: SELECT * FROM languages WHERE userId = userId AND active = true;
-      getUserLanguage: async (_, { userId }) => {
-        // SQL: SELECT * FROM languages;
-        return await prisma.user.findUnique({
-          // WHERE userId = userId AND language = true
-          where: {
-            id: userId, // Find the user by their ID
-          },
-          include: {
-            language: true, // Include the language associated with the user
-          },
-        });
-      },
-      // Fetches the user's bio and profile information.
-      // SQL: SELECT bio, profilePicture FROM users WHERE id = userId;
-      getUserProfileInfo: async (_, { userId }) => {
-        // SELECT bio, username, profilePicture FROM users;
-        return await prisma.user.findUnique({
-          // WHERE id = userId
-          where: { id: userId },
-          select: {
-            bio: true, // Include bio
-            username: true, // Include username
-            profilePicture: true, // Include profile picture
-          },
-        });
-      },
-      // Fetches all ratings associated with a specific user.
-      // SQL: SELECT * FROM userRatings WHERE raterId = userId OR ratedId = userId;
-      getUserRatings: async (_, { userId }) => {
-        // SELECT * FROM userRatings;
-        return await prisma.userRating.findMany({
-          // WHERE raterId = userId OR ratedId = userId
-          where: {
-            OR: [
-              { raterId: userId }, // Ratings given by the user
-              { ratedId: userId }, // Ratings received by the user
-            ],
-          },
-        });
-      },
-      // Fetches ratings given by a specific user.
-      // SQL: SELECT * FROM userRatings WHERE raterId = userId;
-      getUserRatingsGiven: async (_, { userId }) => {
-        // SELECT * FROM userRatings;
-        return await prisma.userRating.findMany({
-          // WHERE raterId = userId
-          where: { raterId: userId },
-        });
-      },
-      // Fetches ratings received by a specific user.
-      // SQL: SELECT * FROM userRatings WHERE ratedId = userId;
-      getUserRatingsReceived: async (_, { userId }) => {
-        // SELECT * FROM userRatings;
-        return await prisma.userRating.findMany({
-          // WHERE ratedId = userId
-          where: { ratedId: userId },
-        });
-      },
+        // Fetches all users with the specified role.
+        // SQL Query: SELECT * FROM users WHERE role = :role;
+        // Fetches all active users (assumes an 'active' field exists).
+        getActiveUsers: async () => {
+          // SQL Query:
+          // SELECT * FROM users WHERE lastActive >= NOW() - INTERVAL '30 days';
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); // Calculate date 30 days ago
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // WHERE lastActive >= NOW() - INTERVAL '30 days'
+            where: {
+              lastActive: {
+                gte: thirtyDaysAgo, // Filter for users who have been active in the last 30 days
+              },
+            },
+          });
+        },
+        // Fetches user role statistics.
+        // SQL: SELECT role, COUNT(*) as userCount FROM users GROUP BY role;
+        getUserRoleStatistics: async () => {
+          const statistics = await prisma.user.groupBy({
+            by: ["role"], // Group by user role
+            _count: {
+              role: true, // Count users per role
+            },
+          });
 
-      // Fetches the user's activity log. g
-      // SQL: SELECT * FROM userActivity WHERE userId = userId;
-      getUserActivityLog: async (_, { userId }) => {
-        // SELECT * FROM userActivity;
-        return await prisma.userActivity.findMany({
-          // WHERE userId = userId
-          where: { userId },
-        });
-      },
-      // Fetches all products listed by a specific user.
-      // SQL: SELECT * FROM products WHERE sellerId = userId;
-      getUserProducts: async (_, { userId }) => {
-        // SELECT * FROM products;
-        return await prisma.product.findMany({
-          // WHERE sellerId = userId;
-          where: { sellerId: userId },
-        });
-      },
-      // Fetches all reviews written by a specific user.
-      // SQL: SELECT * FROM reviews WHERE userId = userId;
-      getUserReviews: async (_, { userId }) => {
-        // SELECT * FROM reviews;
-        return await prisma.review.findMany({
-          // WHERE userId = userId
-          where: { userId },
-        });
-      },
-      // Fetches all saved searches by a specific user.
-      // SQL: SELECT * FROM savedSearches WHERE userId = userId;
-      getUserSavedSearches: async (_, { userId }) => {
-        // SELECT * FROM savedSearches;
-        return await prisma.savedSearch.findMany({
-          // WHERE userId = userId
-          where: { userId },
-        });
+          // Transform the result to return an array of arrays
+          return statistics.map((stat) => [stat.role, stat._count.role]);
+        },
+        // Fetches all badges earned by a specific user.
+        // SQL: SELECT * FROM userBadges WHERE userId = userId;
+        getUserBadges: async (_, { userId }) => {
+          // Query the userBadge records
+          return await prisma.userBadge.findMany({
+            where: { userId }, // Filter by userId
+            include: { badge: true }, // Include details of each badge
+          });
+        },
+        // Fetches all achievements earned by a specific user.
+        // SQL: SELECT * FROM userAchievements WHERE userId = userId;
+        getUserAchievements: async (_, { userId }) => {
+          return await prisma.userAchievement.findMany({
+            where: { userId }, // Filter by userId
+            include: { achievement: true }, // Include achievement details
+          });
+        },
+
+        // Fetches all notifications for a specific user.
+        // SQL: SELECT * FROM notifications WHERE userId = userId;
+        getUserNotifications: async (_, { userId }) => {
+          // SELECT * FROM notifications;
+          return await prisma.notification.findMany({
+            // WHERE userId = userId
+            where: { userId },
+          });
+        },
+        // Fetches all notifications that are unread for a specific user.
+        // SQL: SELECT * FROM notifications WHERE userId = userId AND read = false;
+        getUserUnreadNotifications: async (_, { userId }) => {
+          // SELECT * FROM notifications;
+          return await prisma.notification.findMany({
+            // WHERE userId = userId AND read = false
+            where: { userId, read: false },
+          });
+        },
+        // Fetches all languages spoken by a specific user.
+        // SQL: SELECT * FROM languages WHERE userId = userId AND active = true;
+        getUserLanguage: async (_, { userId }) => {
+          // SQL: SELECT * FROM languages;
+          return await prisma.user.findUnique({
+            // WHERE userId = userId AND language = true
+            where: {
+              id: userId, // Find the user by their ID
+            },
+            include: {
+              language: true, // Include the language associated with the user
+            },
+          });
+        },
+        // Fetches the user's bio and profile information.
+        // SQL: SELECT bio, profilePicture FROM users WHERE id = userId;
+        getUserProfileInfo: async (_, { userId }) => {
+          // SELECT bio, username, profilePicture FROM users;
+          return await prisma.user.findUnique({
+            // WHERE id = userId
+            where: { id: userId },
+            select: {
+              bio: true, // Include bio
+              username: true, // Include username
+              profilePicture: true, // Include profile picture
+            },
+          });
+        },
+        // Fetches all ratings associated with a specific user.
+        // SQL: SELECT * FROM userRatings WHERE raterId = userId OR ratedId = userId;
+        getUserRatings: async (_, { userId }) => {
+          // SELECT * FROM userRatings;
+          return await prisma.userRating.findMany({
+            // WHERE raterId = userId OR ratedId = userId
+            where: {
+              OR: [
+                { raterId: userId }, // Ratings given by the user
+                { ratedId: userId }, // Ratings received by the user
+              ],
+            },
+          });
+        },
+        // Fetches ratings given by a specific user.
+        // SQL: SELECT * FROM userRatings WHERE raterId = userId;
+        getUserRatingsGiven: async (_, { userId }) => {
+          // SELECT * FROM userRatings;
+          return await prisma.userRating.findMany({
+            // WHERE raterId = userId
+            where: { raterId: userId },
+          });
+        },
+        // Fetches ratings received by a specific user.
+        // SQL: SELECT * FROM userRatings WHERE ratedId = userId;
+        getUserRatingsReceived: async (_, { userId }) => {
+          // SELECT * FROM userRatings;
+          return await prisma.userRating.findMany({
+            // WHERE ratedId = userId
+            where: { ratedId: userId },
+          });
+        },
+        // Fetches the user's activity log. g
+        // SQL: SELECT * FROM userActivity WHERE userId = userId;
+        getUserActivityLog: async (_, { userId }) => {
+          // SELECT * FROM userActivity;
+          return await prisma.userActivity.findMany({
+            // WHERE userId = userId
+            where: { userId },
+          });
+        },
+        // Fetches all products listed by a specific user.
+        // SQL: SELECT * FROM products WHERE sellerId = userId;
+        getUserProducts: async (_, { userId }) => {
+          // SELECT * FROM products;
+          return await prisma.product.findMany({
+            // WHERE sellerId = userId;
+            where: { sellerId: userId },
+          });
+        },
+        // Fetches all reviews written by a specific user.
+        // SQL: SELECT * FROM reviews WHERE userId = userId;
+        getUserReviews: async (_, { userId }) => {
+          // SELECT * FROM reviews;
+          return await prisma.review.findMany({
+            // WHERE userId = userId
+            where: { userId },
+          });
+        },
+        // Fetches all saved searches by a specific user.
+        // SQL: SELECT * FROM savedSearches WHERE userId = userId;
+        getUserSavedSearches: async (_, { userId }) => {
+          // SELECT * FROM savedSearches;
+          return await prisma.savedSearch.findMany({
+            // WHERE userId = userId
+            where: { userId },
+          });
+        },
       },
     },
   }),
