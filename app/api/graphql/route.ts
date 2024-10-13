@@ -4,18 +4,6 @@ import GraphQLJSON from "graphql-type-json";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-enum Role {
-  ADMIN = "ADMIN",
-  MODERATOR = "MODERATOR",
-  USER = "USER",
-}
-
-const getUsersByRole = async (role: Role) => {
-  return await prisma.user.findMany({
-    where: { role },
-  });
-};
-
 const dateScalar = new GraphQLScalarType({
   name: "Date",
   description: "Date custom scalar type",
@@ -634,8 +622,6 @@ const { handleRequest } = createYoga({
         getAdminUsers: [User!]! # Fetches all users with the admin role.
         getModeratorUsers: [User!]! # Fetches all users with the moderator role.
         getRegularUsers: [User!]! # Fetches all users with the regular user role.
-        getUserRoles(userId: Int!): [Role!]! # Fetches the role of a specific user.
-        getUsersByRole(role: Role!): [User!]! # Fetches all users with the specified role.
         # User Activity and Status
         getActiveUsers: [User!]! # Fetches all active users.
         getUserRoleStatistics: [[String]]! # Fetches user role statistics as an array of arrays
@@ -814,32 +800,7 @@ const { handleRequest } = createYoga({
           });
         },
       },
-      // Fetches the role of a specific user.
-      // SQL: SELECT role FROM users WHERE id = userId;
-      getUserRoles: async (_, { userId }) => {
-        // SELECT role FROM users;
-        return await prisma.user.findUnique({
-          // WHERE id = userId
-          where: { id: userId },
-          select: { role: true }, // Directly fetch the user's role
-        });
-      },
-      getUsersByRole: async (_, { role }) => {
-        // SELECT * FROM users;
-        return await prisma.user.findMany({
-          // WHERE role = :role
-          where: { role }, // Filter users by the specified role
-        });
-      },
-      getAdminUsers: async () => {
-        return await getUsersByRole(Role.ADMIN);
-      },
-      getModeratorUsers: async () => {
-        return await getUsersByRole(Role.MODERATOR);
-      },
-      getRegularUsers: async () => {
-        return await getUsersByRole(Role.USER);
-      },
+
       // Fetches all users with the specified role.
       // SQL Query: SELECT * FROM users WHERE role = :role;
       // Fetches all active users (assumes an 'active' field exists).
