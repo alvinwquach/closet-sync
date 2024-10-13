@@ -4,6 +4,18 @@ import GraphQLJSON from "graphql-type-json";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+enum Role {
+  ADMIN = "ADMIN",
+  MODERATOR = "MODERATOR",
+  USER = "USER",
+}
+
+const getUsersByRole = async (role: Role) => {
+  return await prisma.user.findMany({
+    where: { role },
+  });
+};
+
 const dateScalar = new GraphQLScalarType({
   name: "Date",
   description: "Date custom scalar type",
@@ -802,33 +814,6 @@ const { handleRequest } = createYoga({
           });
         },
       },
-      // Fetches all users with the admin role.
-      // SQL: SELECT * FROM users WHERE role = 'ADMIN';
-      getAdminUsers: async () => {
-        // SELECT * FROM users;
-        return await prisma.user.findMany({
-          // WHERE role = 'ADMIN'
-          where: { role: "ADMIN" },
-        });
-      },
-      // Fetches all users with the moderator role.
-      // SQL: SELECT * FROM users WHERE role = 'MODERATOR';
-      getModeratorUsers: async () => {
-        // SELECT * FROM users;
-        return await prisma.user.findMany({
-          // WHERE role = 'MODERATOR'
-          where: { role: "MODERATOR" },
-        });
-      },
-      // Fetches all users with the regular user role.
-      // SQL: SELECT * FROM users WHERE role = 'USER';
-      getRegularUsers: async () => {
-        // SELECT * FROM users;
-        return await prisma.user.findMany({
-          // WHERE role = 'USER'
-          where: { role: "USER" },
-        });
-      },
       // Fetches the role of a specific user.
       // SQL: SELECT role FROM users WHERE id = userId;
       getUserRoles: async (_, { userId }) => {
@@ -840,8 +825,6 @@ const { handleRequest } = createYoga({
         });
         return user ? [user.role] : []; // Return the role in an array format
       },
-      // Fetches all users with the specified role.
-      // SQL Query: SELECT * FROM users WHERE role = :role;
       getUsersByRole: async (_, { role }) => {
         // SELECT * FROM users;
         return await prisma.user.findMany({
@@ -849,6 +832,17 @@ const { handleRequest } = createYoga({
           where: { role: role }, // Filter users by the specified role
         });
       },
+      getAdminUsers: async () => {
+        return await getUsersByRole(Role.ADMIN);
+      },
+      getModeratorUsers: async () => {
+        return await getUsersByRole(Role.MODERATOR);
+      },
+      getRegularUsers: async () => {
+        return await getUsersByRole(Role.USER);
+      },
+      // Fetches all users with the specified role.
+      // SQL Query: SELECT * FROM users WHERE role = :role;
       // Fetches all active users (assumes an 'active' field exists).
       getActiveUsers: async () => {
         // SQL Query:
