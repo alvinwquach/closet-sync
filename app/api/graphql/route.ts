@@ -811,8 +811,12 @@ const { handleRequest } = createYoga({
         });
 
         // Transform the result to return an array of arrays
-        return statistics.map((stat) => [stat.role, stat._count.role]);
+        return statistics.map((stat) => [
+          stat.role,
+          stat._count.role.toString(),
+        ]); // Ensure counts are strings
       },
+
       // Fetches all badges earned by a specific user.
       // SQL: SELECT * FROM userBadges WHERE userId = userId;
       getUserBadges: async (_, { userId }) => {
