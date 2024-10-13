@@ -597,6 +597,8 @@ const { handleRequest } = createYoga({
         # User Retrieval
         getUserById(id: Int!): User # Retrieve a specific user by their unique ID.
         getAllUsers: [User!]! # Retrieve a list of all users in the system.
+        searchUsersByUsername(username: String!): [User!]! # Search for users by username.
+        searchUsersByEmail(email: String!): [User!]! # Search for users by email.
       }
     `,
     resolvers: {
