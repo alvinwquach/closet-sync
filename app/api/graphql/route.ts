@@ -593,7 +593,7 @@ const { handleRequest } = createYoga({
 
       type Query {
         # User Retrieval
-        getUserById(id: Int!): User # Retrieve a specific user by their unique ID.
+        getUserById(id: Int!): User! # Retrieve a specific user by their unique ID.
         getAllUsers: [User!]! # Retrieve a list of all users in the system.
         getRecentUsers(limit: Int!): [User!]! # Fetch a limited number of recent users.
         getUsersByRegistrationDateRange(
@@ -624,9 +624,11 @@ const { handleRequest } = createYoga({
         getRegularUsers: [User!]! # Fetches all users with the regular user role.
         getUserRoles(userId: Int!): [Role!]! # Fetches the role of a specific user.
         getUsersByRole(role: Role!): [User!]! # Fetches all users with the specified role.
+        getAllRoles: [Role!]! # Get all available roles.
         # User Activity and Status
         getActiveUsers: [User!]! # Fetches all active users.
-        getUserRoleStatistics: [[String]]! # Fetches user role statistics as an array of arrays
+        getUserRoleStatistics: [[String]]! # Fetches user role statistics as an array of arrays.
+        # User Achievements and Badges
         getUserBadges(userId: Int!): [UserBadge!]! # Fetches all badges earned by a specific user.
         getUserAchievements(userId: Int!): [UserAchievement!]! # Fetches all achievements earned by a specific user.
         # Notifications
@@ -802,8 +804,53 @@ const { handleRequest } = createYoga({
           });
         },
 
+        // Fetches all users with the admin role.
+        // SQL: SELECT * FROM users WHERE role = 'ADMIN';
+        getAdminUsers: async () => {
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // WHERE role = 'ADMIN'
+            where: { role: "ADMIN" },
+          });
+        },
+        // Fetches all users with the moderator role.
+        // SQL: SELECT * FROM users WHERE role = 'MODERATOR';
+        getModeratorUsers: async () => {
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // WHERE role = 'MODERATOR'
+            where: { role: "MODERATOR" },
+          });
+        },
+        // Fetches all users with the regular user role.
+        // SQL: SELECT * FROM users WHERE role = 'USER';
+        getRegularUsers: async () => {
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // WHERE role = 'USER'
+            where: { role: "USER" },
+          });
+        },
+        // Fetches the role of a specific user.
+        // SQL: SELECT role FROM users WHERE id = userId;
+        getUserRoles: async (_, { userId }) => {
+          // SELECT role FROM users;
+          const user = await prisma.user.findUnique({
+            // WHERE id = userId
+            where: { id: userId },
+            select: { role: true }, // Directly fetch the user's role
+          });
+          return user ? [user.role] : []; // Return the role in an array format
+        },
         // Fetches all users with the specified role.
         // SQL Query: SELECT * FROM users WHERE role = :role;
+        getUsersByRole: async (_, { role }) => {
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // WHERE role = :role
+            where: { role: role }, // Filter users by the specified role
+          });
+        },
         // Fetches all active users (assumes an 'active' field exists).
         getActiveUsers: async () => {
           // SQL Query:
@@ -823,15 +870,12 @@ const { handleRequest } = createYoga({
         // Fetches user role statistics.
         // SQL: SELECT role, COUNT(*) as userCount FROM users GROUP BY role;
         getUserRoleStatistics: async () => {
-          const statistics = await prisma.user.groupBy({
+          return await prisma.user.groupBy({
             by: ["role"], // Group by user role
             _count: {
               role: true, // Count users per role
             },
           });
-
-          // Transform the result to return an array of arrays
-          return statistics.map((stat) => [stat.role, stat._count.role]);
         },
         // Fetches all badges earned by a specific user.
         // SQL: SELECT * FROM userBadges WHERE userId = userId;
