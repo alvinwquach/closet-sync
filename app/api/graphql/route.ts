@@ -597,8 +597,13 @@ const { handleRequest } = createYoga({
         # User Retrieval
         getUserById(id: Int!): User # Retrieve a specific user by their unique ID.
         getAllUsers: [User!]! # Retrieve a list of all users in the system.
-        searchUsersByUsername(username: String!): [User!]! # Search for users by username.
-        searchUsersByEmail(email: String!): [User!]! # Search for users by email.
+        # Fetches the most recently registered users.
+        getRecentUsers(limit: Int!): [User!]! # Fetch a limited number of recent users.
+        # Fetches users who registered within a specific date range.
+        getUsersByRegistrationDateRange(
+          startDate: DateTime!
+          endDate: DateTime!
+        ): [User!]! # Fetch users registered within a date range.
       }
     `,
     resolvers: {
@@ -654,29 +659,29 @@ const { handleRequest } = createYoga({
         // },
         // Fetches the most recently registered users.
         // SQL: SELECT * FROM users ORDER BY createdAt DESC LIMIT limit;
-        // getRecentUsers: async (_, { limit }) => {
-        //   // SELECT * FROM users;
-        //   return await prisma.user.findMany({
-        //     // ORDER BY createdAt, newest first
-        //     orderBy: { createdAt: "desc" },
-        //     // LIMIT limit
-        //     take: limit,
-        //   });
-        // },
+        getRecentUsers: async (_, { limit }) => {
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // ORDER BY createdAt, newest first
+            orderBy: { createdAt: "desc" },
+            // LIMIT limit
+            take: limit,
+          });
+        },
         // Fetches users who registered within a specific date range.
         // SQL: SELECT * FROM users WHERE createdAt BETWEEN startDate AND endDate;
-        // getUsersByRegistrationDateRange: async (_, { startDate, endDate }) => {
-        //   // SELECT * FROM users;
-        //   return await prisma.user.findMany({
-        //     // WHERE createdAt BETWEEN startDate AND endDate
-        //     where: {
-        //       createdAt: {
-        //         gte: startDate,
-        //         lte: endDate,
-        //       },
-        //     },
-        //   });
-        // },
+        getUsersByRegistrationDateRange: async (_, { startDate, endDate }) => {
+          // SELECT * FROM users;
+          return await prisma.user.findMany({
+            // WHERE createdAt BETWEEN startDate AND endDate
+            where: {
+              createdAt: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+          });
+        },
         // Fetches all products favorited by a specific user.
         // SQL: SELECT * FROM products WHERE id IN (SELECT productId FROM favorites WHERE userId = userId);
         // getUserFavorites: async (_, { userId }) => {
