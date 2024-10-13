@@ -818,18 +818,17 @@ const { handleRequest } = createYoga({
       // SQL: SELECT role FROM users WHERE id = userId;
       getUserRoles: async (_, { userId }) => {
         // SELECT role FROM users;
-        const user = await prisma.user.findUnique({
+        return await prisma.user.findUnique({
           // WHERE id = userId
           where: { id: userId },
-          select: { role: true }, // Directly fetch the user's role
+          select: { role: true },
         });
-        return user ? [user.role] : []; // Return the role in an array format
       },
       getUsersByRole: async (_, { role }) => {
         // SELECT * FROM users;
         return await prisma.user.findMany({
           // WHERE role = :role
-          where: { role: role }, // Filter users by the specified role
+          where: { role }, // Filter users by the specified role
         });
       },
       getAdminUsers: async () => {
