@@ -626,7 +626,7 @@ const { handleRequest } = createYoga({
         getUsersByRole(role: String!): [User!]! # Fetches all users with the specified role.
         # User Activity and Status
         getActiveUsers: [User!]! # Fetches all active users.
-        getUserRoleStatistics: [UserRoleStatistics!]! # Fetches user role statistics.
+        getUserRoleStatistics: [[String]]! # Fetches user role statistics as an array of arrays
         getUserBadges(userId: Int!): [UserBadge!]! # Fetches all badges earned by a specific user.
         getUserAchievements(userId: Int!): [UserAchievement!]! # Fetches all achievements earned by a specific user.
         # Notifications
@@ -868,12 +868,15 @@ const { handleRequest } = createYoga({
       // Fetches user role statistics.
       // SQL: SELECT role, COUNT(*) as userCount FROM users GROUP BY role;
       getUserRoleStatistics: async () => {
-        return await prisma.user.groupBy({
+        const statistics = await prisma.user.groupBy({
           by: ["role"], // Group by user role
           _count: {
             role: true, // Count users per role
           },
         });
+
+        // Transform the result to return an array of arrays
+        return statistics.map((stat) => [stat.role, stat._count.role]);
       },
       // Fetches all badges earned by a specific user.
       // SQL: SELECT * FROM userBadges WHERE userId = userId;
