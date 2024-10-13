@@ -596,8 +596,6 @@ const { handleRequest } = createYoga({
         # User Retrieval
         getUserById(id: Int!): User # Retrieve a specific user by their unique ID.
         getAllUsers: [User!]! # Retrieve a list of all users in the system.
-        searchUsersByUsername(username: String!): [User!]! # Search for users by their username.
-        searchUsersByEmail(email: String!): [User!]! # Search for users by their email address.
         getRecentUsers(limit: Int!): [User!]! # Retrieve the most recently registered users.
         getUsersByRegistrationDateRange(
           startDate: DateTime!
@@ -670,28 +668,28 @@ const { handleRequest } = createYoga({
             where: { id: userId },
           });
         },
-        // Searches for users by username.
-        // SQL Query: SELECT * FROM users WHERE username LIKE :username;
-        searchUsersByUsername: async (_, { username }) => {
-          // SELECT * FROM users;
-          return await prisma.user.findMany({
-            // WHERE username LIKE :username
-            where: {
-              username: { contains: username, mode: "insensitive" },
-            },
-          });
-        },
-        // Searches for users by email.
-        // SQL Query: SELECT * FROM users WHERE email LIKE :email;
-        searchUsersByEmail: async (_, { email }) => {
-          // SELECT * FROM users;
-          return await prisma.user.findMany({
-            // WHERE email LIKE :email
-            where: {
-              email: { contains: email, mode: "insensitive" },
-            },
-          });
-        },
+        // // Searches for users by username.
+        // // SQL Query: SELECT * FROM users WHERE username LIKE :username;
+        // searchUsersByUsername: async (_, { username }) => {
+        //   // SELECT * FROM users;
+        //   return await prisma.user.findMany({
+        //     // WHERE username LIKE :username
+        //     where: {
+        //       username: { contains: username, mode: "insensitive" },
+        //     },
+        //   });
+        // },
+        // // Searches for users by email.
+        // // SQL Query: SELECT * FROM users WHERE email LIKE :email;
+        // searchUsersByEmail: async (_, { email }) => {
+        //   // SELECT * FROM users;
+        //   return await prisma.user.findMany({
+        //     // WHERE email LIKE :email
+        //     where: {
+        //       email: { contains: email, mode: "insensitive" },
+        //     },
+        //   });
+        // },
         // Fetches the most recently registered users.
         // SQL: SELECT * FROM users ORDER BY createdAt DESC LIMIT limit;
         getRecentUsers: async (_, { limit }) => {
