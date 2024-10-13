@@ -800,25 +800,6 @@ const { handleRequest } = createYoga({
           });
         },
       },
-
-      // Fetches all users with the specified role.
-      // SQL Query: SELECT * FROM users WHERE role = :role;
-      // Fetches all active users (assumes an 'active' field exists).
-      getActiveUsers: async () => {
-        // SQL Query:
-        // SELECT * FROM users WHERE lastActive >= NOW() - INTERVAL '30 days';
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); // Calculate date 30 days ago
-        // SELECT * FROM users;
-        return await prisma.user.findMany({
-          // WHERE lastActive >= NOW() - INTERVAL '30 days'
-          where: {
-            lastActive: {
-              gte: thirtyDaysAgo, // Filter for users who have been active in the last 30 days
-            },
-          },
-        });
-      },
       // Fetches user role statistics.
       // SQL: SELECT role, COUNT(*) as userCount FROM users GROUP BY role;
       getUserRoleStatistics: async () => {
