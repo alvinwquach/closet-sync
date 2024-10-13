@@ -633,7 +633,7 @@ const { handleRequest } = createYoga({
         getUserNotifications(userId: Int!): [Notification!]! # Fetches all notifications for a specific user.
         getUserUnreadNotifications(userId: Int!): [Notification!]! # Fetches all unread notifications for a specific user.
         # Languages and Profile Info
-        getUserLanguages(userId: Int!): [Language!]! # Fetches all languages spoken by a specific user.
+        getUserLanguage(userId: Int!): [Language!]! # Fetches all languages spoken by a specific user.
         getUserProfileInfo(userId: Int!): UserProfileInfo! # Fetches the user's bio and profile information.
         # User Ratings
         getUserRatings(userId: Int!): [UserRating!]! # Fetches all ratings associated with a specific user.
@@ -912,24 +912,29 @@ const { handleRequest } = createYoga({
         });
       },
       // Fetches all languages spoken by a specific user.
-      // SQL: SELECT * FROM languages WHERE userId = userId;
-      getUserLanguages: async (_, { userId }) => {
-        // SELECT * FROM languages;
-        return await prisma.language.findMany({
-          // WHERE userId = userId
-          where: { userId },
+      // SQL: SELECT * FROM languages WHERE userId = userId AND active = true;
+      getUserLanguage: async (_, { userId }) => {
+        // SQL: SELECT * FROM languages;
+        return await prisma.user.findUnique({
+          // WHERE userId = userId AND language = true
+          where: {
+            id: userId, // Find the user by their ID
+          },
+          include: {
+            language: true, // Include the language associated with the user
+          },
         });
       },
       // Fetches the user's bio and profile information.
       // SQL: SELECT bio, profilePicture FROM users WHERE id = userId;
       getUserProfileInfo: async (_, { userId }) => {
-        // SELECT bio, profilePicture FROM users;
+        // SELECT bio, username, profilePicture FROM users;
         return await prisma.user.findUnique({
           // WHERE id = userId
           where: { id: userId },
           select: {
             bio: true, // Include bio
-            username: true, // Indlue username
+            username: true, // Include username
             profilePicture: true, // Include profile picture
           },
         });

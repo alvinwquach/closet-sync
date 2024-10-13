@@ -44,6 +44,19 @@ enum RaffleStatus {
   CANCELED // Raffle has been canceled
 }
 
+enum TicketStatus {
+    OPEN             // The ticket has been created and is awaiting attention
+    IN_PROGRESS      // The ticket is currently being addressed by support staff
+    RESOLVED         // The issue has been resolved, and the ticket is waiting for confirmation
+    CLOSED           // The ticket has been officially closed after resolution
+}
+
+enum RaffleResult {
+  WON    // User won the raffle
+  LOST   // User lost the raffle
+  PENDING // Raffle outcome is still pending
+}
+
 enum ReactionType {
   LIKE // Like reaction
   LOVE // Love reaction
@@ -59,119 +72,123 @@ enum ReactionType {
   APPLAUD // Applaud reaction
 }
 
-// User Management
 model User {
   id               Int               @id @default(autoincrement()) // Unique identifier for each user
   email            String            @unique // User's email address (must be unique)
   password         String            // User's password (hashed for security)
   role             Role              @default(USER) // Role of the user (e.g., admin, regular user)
   username         String            @unique // Unique username for the user
-  products         Product[]         // Products listed by the user
-  favorites        Product[]         @relation("Favorites") // Products favorited by the user
-  viewedProducts   Product[]         @relation("ViewedProducts") // Products viewed by the user
-  searchHistory    SearchHistory[]    // User's search history
-  enteredRaffles   RaffleEntry[]      // Raffles the user has entered
-  notifications    Notification[]     // Notifications sent to the user
-  ratingsGiven     UserRating[]      @relation("RatingsGiven") // Ratings given by the user to products
-  ratingsReceived  UserRating[]      @relation("RatingsReceived") // Ratings received by the user for their products
   createdAt        DateTime          @default(now()) // Timestamp for when the user account was created
   profilePicture   String?           // URL to the user's profile picture (optional)
   bio              String?           // Short biography or description of the user (optional)
   location         String?           // User's location (optional)
   lastActive       DateTime?         // Timestamp for the user's last activity (optional)
-  sentMessages     Message[]         @relation("Sender") // Messages sent by the user
-  receivedMessages Message[]         @relation("Receiver") // Messages received by the user
-  reactions        MessageReaction[]  // Reactions the user has given to messages
-  wishlist         Wishlist[]        // Wishlist of products the user is interested in
-  reviews          Review[]          // Reviews written by the user for products
-  feedback         Feedback[]        // Feedback provided by the user
-  searchFilter     SearchFilter[]    // Filters used by the user during product searches
-  savedSearch      SavedSearch[]     // Saved searches by the user for easy access
-  report           Report[]          // Reports made by the user
-  userActivity     UserActivity[]    // Records of the user's activity on the platform
-  userPreferences  UserPreference[]  // User preferences for platform settings
-  moderationReports ModerationReport[] // Reports made by the user regarding moderation
-  engagementMetrics EngagementMetric[] // Metrics tracking the user's engagement on the platform
-  following        UserFollow[]      @relation("UserFollows") // Users that this user follows
-  followers        UserFollow[]      @relation("UserFollowedBy") // Users that follow this user
-  threads          Thread[]          // Threads started by the user in discussions
-  posts            Post[]            // Posts made by the user
-  postReactions    PostReaction[]    @relation("UserPostReactions") // Reactions to posts made by this user
-  polls            Poll[]            // Polls created by the user
-  pollVotes        PollVote[]        // Votes cast by the user in polls
-  userBadges       UserBadge[]      // Badges earned by the user for achievements
-  supportTickets   SupportTicket[]   // Support tickets submitted by the user
-  comments         Comment[]         // Comments made by the user on various content
-  productRating    ProductRating[]   // Ratings given to products by this user
-  language         Language[]        // Languages spoken by the user
-  userAchievements  UserAchievement[] // Achievements earned by the user
-  leaderboards      Leaderboard[]     // Leaderboard entries for the user
+  products         Product[]         // One-to-many: A user can list many products
+  favorites        Product[]         @relation("Favorites") // Many-to-many: Users can favorite many products
+  viewedProducts   Product[]         @relation("ViewedProducts") // Many-to-many: Users can view many products
+  searchHistory    SearchHistory[]    // One-to-many: A user can have multiple search history records
+  enteredRaffles   RaffleEntry[]      // One-to-many: A user can enter multiple raffles
+  notifications    Notification[]     // One-to-many: A user can receive many notifications
+  ratingsGiven     UserRating[]      @relation("RatingsGiven") // One-to-many: A user can give ratings to many users
+  ratingsReceived  UserRating[]      @relation("RatingsReceived") // One-to-many: A user can receive ratings from many users
+  sentMessages     Message[]         @relation("Sender") // One-to-many: Messages sent by the user
+  receivedMessages Message[]         @relation("Receiver") // One-to-many: Messages received by the user
+  reactions        MessageReaction[]  // One-to-many: Reactions given by the user to messages
+  wishlist         Wishlist[]        // One-to-many: Wishlist of products the user is interested in
+  reviews          Review[]          // One-to-many: Reviews written by the user for products
+  feedback         Feedback[]        // One-to-many: Feedback provided by the user
+  searchFilter     SearchFilter[]    // One-to-many: Filters used by the user during product searches
+  savedSearch      SavedSearch[]     // One-to-many: Saved searches by the user for easy access
+  report           Report[]          // One-to-many: Reports made by the user
+  userActivity     UserActivity[]    // One-to-many: Records of the user's activity on the platform
+  userPreferences  UserPreference[]  // One-to-many: User preferences for platform settings
+  moderationReports ModerationReport[] // One-to-many: Reports made by the user regarding moderation
+  engagementMetrics EngagementMetric[] // One-to-many: Metrics tracking the user's engagement on the platform
+  following        UserFollow[]      @relation("UserFollows") // One-to-many: Users that this user follows
+  followers        UserFollow[]      @relation("UserFollowedBy") // One-to-many: Users that follow this user
+  threads          Thread[]          // One-to-many: Threads started by the user in discussions
+  posts            Post[]            // One-to-many: Posts made by the user
+  postReactions    PostReaction[]    @relation("UserPostReactions") // One-to-many: Reactions to posts made by this user
+  polls            Poll[]            // One-to-many: Polls created by the user
+  pollVotes        PollVote[]        // One-to-many: Votes cast by the user in polls
+  userBadges       UserBadge[]      // One-to-many: Badges earned by the user for achievements
+  supportTickets   SupportTicket[]   // One-to-many: Support tickets submitted by the user
+  comments         Comment[]         // One-to-many: Comments made by the user on various content
+  productRating    ProductRating[]   // One-to-many: Ratings given to products by this user
+  language         Language[]        // One-to-many: Languages spoken by the user
+  userAchievements  UserAchievement[] // One-to-many: Achievements earned by the user
+  leaderboards      Leaderboard[]     // One-to-many: Leaderboard entries for the user
+
+  @@unique([username, email]) // Ensures username and email are unique
 }
 
-// User Follow model for follow relationships
 model UserFollow {
-  id         Int  @id @default(autoincrement()) // Unique ID for follow relationship
-  followerId Int // User ID of the follower
-  followedId Int // User ID of the user being followed
-  // Relationships to User
-  follower   User @relation("UserFollows", fields: [followerId], references: [id]) // Follower relationship
-  followed   User @relation("UserFollowedBy", fields: [followedId], references: [id]) // Followed relationship
+  id         Int  @id @default(autoincrement()) // Unique ID for follow relationship (Primary Key)
+  followerId Int // User ID of the follower (Foreign Key)
+  followedId Int // User ID of the user being followed (Foreign Key)
+  follower   User @relation("UserFollows", fields: [followerId], references: [id]) // Many-to-one: A user can follow many users
+  followed   User @relation("UserFollowedBy", fields: [followedId], references: [id]) // Many-to-one: A user can be followed by many users
+
+  @@unique([followerId, followedId]) // Ensures unique follower-followed relationship
 }
 
-// User Rating model for user ratings
 model UserRating {
-  id      Int  @id @default(autoincrement()) // Unique ID for rating
-  raterId Int // User ID of the person giving the rating
-  ratedId Int // User ID of the person receiving the rating
+  id      Int  @id @default(autoincrement()) // Unique ID for rating (Primary Key)
+  raterId Int // User ID of the person giving the rating (Foreign Key)
+  ratedId Int // User ID of the person receiving the rating (Foreign Key)
   rating  Int // Rating value (e.g., 1-5)
-  // Relationships to User
-  rater   User @relation("RatingsGiven", fields: [raterId], references: [id]) // Link to User who rated
-  rated   User @relation("RatingsReceived", fields: [ratedId], references: [id]) // Link to User who is rated
+
+  rater   User @relation("RatingsGiven", fields: [raterId], references: [id]) // Many-to-one: A user can give many ratings
+  rated   User @relation("RatingsReceived", fields: [ratedId], references: [id]) // Many-to-one: A user can receive many ratings
+
+  @@unique([raterId, ratedId]) // Ensures unique rating from one user to another
 }
 
-// User Badge model for tracking user badges
 model UserBadge {
-  id        Int      @id @default(autoincrement()) // Unique ID for the user badge entry
-  userId    Int // User ID who earned the badge
-  badgeId   Int // Badge ID that this entry relates to
+  id        Int      @id @default(autoincrement()) // Unique ID for the user badge entry (Primary Key)
+  userId    Int // User ID who earned the badge (Foreign Key)
+  badgeId   Int // Badge ID that this entry relates to (Foreign Key)
   createdAt DateTime @default(now()) // Timestamp of when the badge was earned
-  // Relationships to User and Badge
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
-  badge     Badge    @relation(fields: [badgeId], references: [id]) // Link to Badge
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-one: A badge is associated with one user
+  badge     Badge    @relation(fields: [badgeId], references: [id]) // Many-to-one: A badge is related to one badge definition
+
+  @@unique([userId, badgeId]) // Ensures a user can earn a badge only once
 }
 
-// User Activity model for tracking user activities
 model UserActivity {
-  id        Int      @id @default(autoincrement()) // Unique ID for activity
-  userId    Int // User ID associated with this activity
+  id        Int      @id @default(autoincrement()) // Unique ID for activity (Primary Key)
+  userId    Int // User ID associated with this activity (Foreign Key)
   action    String // Description of the action taken by the user
   createdAt DateTime @default(now()) // Timestamp of when the action occurred
-  // Relationship to User
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-one: Activity is related to one user
+
+  @@unique([userId, createdAt]) // Ensures unique activities for a user at the same timestamp
 }
 
-// User Feedback model for collecting user feedback
 model Feedback {
-  id        Int      @id @default(autoincrement()) // Unique ID for feedback
-  userId    Int // User ID providing the feedback
-  message   String // Feedback message content
+  id        Int      @id @default(autoincrement()) // Unique ID for feedback (Primary Key)
+  userId    Int      // User ID providing the feedback (Foreign Key)
+  productId Int      // Product ID associated with the feedback (Foreign Key)
+
+  message   String   // Feedback message content
   createdAt DateTime @default(now()) // Timestamp of when the feedback was created
-  // Relationship to User
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
+  
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-one: Feedback is linked to one user
+  product   Product   @relation("ProductFeedback", fields: [productId], references: [id]) // Many-to-one: Feedback is linked to one product
+
+  @@unique([userId, createdAt]) // Ensures unique feedback for a user at the same timestamp
 }
 
-// User Notification model for user notifications
+
 model Notification {
-  id        Int      @id @default(autoincrement()) // Unique ID for notification
-  userId    Int // User ID to receive this notification
+  id        Int      @id @default(autoincrement()) // Unique ID for notification (Primary Key)
+  userId    Int // User ID to receive this notification (Foreign Key)
   message   String // Notification message content
   createdAt DateTime @default(now()) // Timestamp of when the notification was created
   read      Boolean  @default(false) // Indicates if the notification has been read
-  // Relationship to User
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-one: Notification is related to one user
 }
 
-// Product Management
 model Product {
   id           Int             @id @default(autoincrement()) // Unique identifier for each product
   title        String          // The title or name of the product
@@ -179,439 +196,452 @@ model Product {
   price        Float           // The price of the product
   condition    Condition       // The condition of the product (e.g., new, used)
   createdAt    DateTime        @default(now()) // Timestamp for when the product was created
-  listedAt     DateTime        // Timestamp for when the product was listed for sale
   soldAt       DateTime?       // Optional timestamp for when the product was sold
   releaseDate  DateTime?       // Optional release date for the product
   sellerId     Int             // ID of the user who is selling the product
-  seller       User            @relation(fields: [sellerId], references: [id]) // Relationship to the seller user
-  favoritedBy  User[]          @relation("Favorites") // Users who have favorited this product
-  viewedBy     User[]          @relation("ViewedProducts") // Users who have viewed this product
-  priceHistory PriceHistory[]   // History of price changes for the product
   hasRaffle    Boolean         @default(false) // Indicates if there is a raffle associated with the product
-  raffles      Raffle[]        @relation // Relationship to any raffles for this product
-  media        Media[]         // Media files (images, videos) associated with the product
   countryId    Int?            // Optional ID of the country where the product is listed
-  country      Country?        @relation(fields: [countryId], references: [id]) // Relationship to the country
   brandId      Int?            // Optional ID of the brand associated with the product
-  brand        Brand?          @relation(fields: [brandId], references: [id]) // Relationship to the brand
-  ratings      ProductRating[]  // User ratings for the product
-  reports      Report[]        // Reports related to the product (e.g., for inappropriate content)
-  comments     Comment[]       // Comments made by users on the product
-  wishlistedBy Wishlist[]      // Users who have added this product to their wishlist
-  reviews      Review[]        // Reviews provided by users for the product
-  engagementMetrics EngagementMetric[] // Metrics tracking user engagement with the product
-  tags             ProductTag[]       // Tags associated with the product for categorization
-  variants         ProductVariant[]    // Variants of the product (e.g., different sizes or colors)
-  bundles      BundleProduct[] // List of bundles that this product belongs to
+  seller       User            @relation(fields: [sellerId], references: [id]) // Many-to-one: A product has one seller
+  favoritedBy  User[]          @relation("Favorites") // Many-to-many: Products can be favorited by many users
+  viewedBy     User[]          @relation("ViewedProducts") // Many-to-many: Products can be viewed by many users
+  priceHistory PriceHistory[]   // One-to-many: A product can have multiple price history entries
+  raffles      Raffle[]        @relation // One-to-many: A product can have multiple associated raffles
+  media        Media[]         // One-to-many: A product can have multiple media files (images, videos)
+  country      Country?        @relation(fields: [countryId], references: [id]) // Many-to-one: A product can belong to one country
+  brand        Brand?          @relation(fields: [brandId], references: [id]) // Many-to-one: A product can belong to one brand
+  ratings      ProductRating[]  // One-to-many: A product can receive many ratings from users
+  reports      Report[]        // One-to-many: A product can have many reports related to it
+  comments     Comment[]       // One-to-many: A product can have many comments
+  wishlistedBy Wishlist[]      // Many-to-many: Users can add this product to their wishlist
+  reviews      Review[]        // One-to-many: A product can receive many reviews from users
+  engagementMetrics EngagementMetric[] // One-to-many: Metrics tracking engagement with the product
+  tags             ProductTag[]       // Many-to-many: Tags associated with the product for categorization
+  variants         ProductVariant[]    // One-to-many: A product can have multiple variants (e.g., different sizes or colors)
+  bundles      BundleProduct[] // One-to-many: A product can belong to multiple bundles
+  categories    ProductCategory[] // Many-to-many: A product can belong to many categories
+  quantity     Int      // User-defined quantity they want to sell (e.g., how many items a seller lists for sale)
+  stock        Int?     // Actual stock available (optional, for inventory management)
+  feedback        Feedback[]       @relation("ProductFeedback") // One-to-many: A product can have multiple feedback entries
 }
 
-// Country model
+model Category {
+  id          Int       @id @default(autoincrement()) // Unique ID for the category
+  name        String    // The name of the category (e.g., Electronics, Clothing)
+  description String?   // A brief description of the category, optional
+  products    ProductCategory[] // Many-to-many: A category can contain many products
+}
+
+model ProductCategory {
+  productId   Int // Foreign key to Product
+  categoryId  Int // Foreign key to Category
+  product     Product @relation(fields: [productId], references: [id]) // Many-to-one: Product belongs to one category
+  category    Category @relation(fields: [categoryId], references: [id]) // Many-to-one: Category can contain multiple products
+
+  @@id([productId, categoryId]) // Composite primary key
+}
+
 model Country {
   id       Int       @id @default(autoincrement()) // Unique ID for the country
-  name     String // Name of the country
-  products Product[] // Products associated with this country
+  name     String    // Name of the country
+
+  products Product[] // One-to-many: A country can have multiple associated products
 }
 
-// Brand model
 model Brand {
   id       Int       @id @default(autoincrement()) // Unique ID for the brand
-  name     String // Name of the brand
-  products Product[] // Products associated with this brand
+  name     String    // Name of the brand
+  products Product[] // One-to-many: A brand can have multiple associated products
 }
 
-// Price History model
 model PriceHistory {
   id        Int      @id @default(autoincrement()) // Unique ID for price history entry
   productId Int // Associated product ID
   price     Float // Price value
-  createdAt DateTime @default(now()) // Timestamp for when the price was recorded
-  // Relationship to Product
-  product   Product  @relation(fields: [productId], references: [id]) // Link to Product
+  createdAt DateTime @default(now()) // Timestamp of when the price was recorded
+  product   Product  @relation(fields: [productId], references: [id]) // Many-to-one: Price history is linked to one product
+
+  @@unique([productId, createdAt]) // Unique price history per product per timestamp
 }
 
-// Raffle model
 model Raffle {
   id          Int           @id @default(autoincrement()) // Unique ID for the raffle
-  title       String // Title of the raffle
-  description String // Detailed description
-  type        RaffleType // Type of the raffle
-  status      RaffleStatus // Current status of the raffle
-  createdAt   DateTime      @default(now()) // Timestamp of when the raffle was created
-  endsAt      DateTime // Timestamp for when the raffle ends
-  // Foreign Key linking to Product
-  productId   Int // Product associated with the raffle
-  product     Product       @relation(fields: [productId], references: [id]) // Link to Product
-  entries     RaffleEntry[] // Entries for this raffle
+  title       String        // Title of the raffle
+  description String        // Detailed description
+  type        RaffleType    // Type of the raffle
+  status      RaffleStatus  // Current status of the raffle
+  createdAt   DateTime      @default(now()) // Timestamp for when the raffle was created
+  endsAt      DateTime      // Timestamp for when the raffle ends
+  productId   Int           // Product associated with the raffle
+  product     Product       @relation(fields: [productId], references: [id]) // Many-to-One: Raffle is linked to one Product
+  entries     RaffleEntry[] // One-to-Many: A raffle can have multiple entries
 }
 
-// Raffle Entry model for tracking entries
 model RaffleEntry {
   id        Int      @id @default(autoincrement()) // Unique ID for entry
-  userId    Int // User ID of the entrant
-  raffleId  Int // Raffle ID entered
+  userId    Int      // User ID of the entrant
+  raffleId  Int      // Raffle ID entered
   createdAt DateTime @default(now()) // Timestamp of entry creation
-  // Relationships to User and Raffle
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
-  raffle    Raffle   @relation(fields: [raffleId], references: [id]) // Link to Raffle
+  result    RaffleResult // Result of the entry (WON, LOST, PENDING)
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Raffle entry is linked to one User
+  raffle    Raffle   @relation(fields: [raffleId], references: [id]) // Many-to-One: Raffle entry is linked to one Raffle
+
+  @@unique([userId, raffleId]) // Ensure a user can enter a raffle only once
 }
 
-// Media model for storing product media
 model Media {
   id        Int      @id @default(autoincrement()) // Unique ID for media entry
-  productId Int // Product ID that this media belongs to
-  url       String // URL of the media file
-  type      String // Type of media (image, video, etc.)
+  productId Int      // Product ID that this media belongs to
+  url       String   // URL of the media file (e.g., image, video)
+  type      String   // Type of media (image, video, etc.)
   createdAt DateTime @default(now()) // Timestamp of when the media was added
-  // Relationship to Product
-  product   Product  @relation(fields: [productId], references: [id]) // Link to Product
+  product   Product  @relation(fields: [productId], references: [id]) // Many-to-One: Each media entry is linked to one Product
 }
 
-// Comment model for product comments
 model Comment {
-  id        Int      @id @default(autoincrement()) // Unique ID for comment
-  productId Int // Product ID the comment is associated with
-  userId    Int // User ID of the commenter
-  threadId  Int? // Optional Thread ID the comment is associated with
-  content   String // Comment content
+  id        Int      @id @default(autoincrement()) // Unique ID for comment (Primary Key)
+  productId Int      // Product ID the comment is associated with (Foreign Key)
+  userId    Int      // User ID of the commenter (Foreign Key)
+  threadId  Int?     // Optional Thread ID the comment is associated with (Foreign Key)
+  content   String   // Content of the comment
   createdAt DateTime @default(now()) // Timestamp of when the comment was created
-  // Relationships to User, Product, and Thread
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
-  product   Product  @relation(fields: [productId], references: [id]) // Link to Product
-  thread    Thread?  @relation(fields: [threadId], references: [id]) // Link to Thread
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Each comment is linked to one User
+  product   Product  @relation(fields: [productId], references: [id]) // Many-to-One: Each comment is linked to one Product
+  thread    Thread?  @relation(fields: [threadId], references: [id]) // Many-to-One: Optional link to a discussion thread
+
+  @@unique([userId, productId]) // Ensure a user can only comment once per Product
 }
 
-// Report model for reporting issues with products
 model Report {
-  id          Int      @id @default(autoincrement()) // Unique ID for report
-  productId   Int // Product ID that is being reported
-  userId      Int // User ID who is reporting
-  reason      String // Reason for the report
-  createdAt   DateTime @default(now()) // Timestamp of when the report was filed
-  // New field to track blocked users
-  blockedUserId Int? // User ID that has been blocked
-  // Relationships to User and Product
-  user        User     @relation(fields: [userId], references: [id]) // Link to User
-  product     Product  @relation(fields: [productId], references: [id]) // Link to Product
+  id             Int      @id @default(autoincrement()) // Unique ID for report (Primary Key)
+  productId      Int      // Product ID that is being reported (Foreign Key)
+  userId         Int      // User ID who is reporting (Foreign Key)
+  reason         String   // Reason for the report
+  createdAt      DateTime @default(now()) // Timestamp of when the report was filed
+  blockedUserId  Int?     // User ID that has been blocked (optional, Foreign Key)
+  user           User     @relation(fields: [userId], references: [id]) // Many-to-One: Each report is linked to one User
+  product        Product  @relation(fields: [productId], references: [id]) // Many-to-One: Each report is linked to one Product
+
+  @@unique([userId, productId]) // Ensure a user can report the same Product only once
 }
 
-// Message model for direct user messaging
 model Message {
-  id         Int               @id @default(autoincrement()) // Unique ID for message
-  senderId   Int // User ID of the sender
-  receiverId Int // User ID of the receiver
-  content    String // Message content
+  id         Int               @id @default(autoincrement()) // Unique ID for message (Primary Key)
+  senderId   Int               // User ID of the sender (Foreign Key)
+  receiverId Int               // User ID of the receiver (Foreign Key)
+  content    String            // Content of the message
   createdAt  DateTime          @default(now()) // Timestamp of when the message was sent
-  // Relationships to User
-  sender     User              @relation("Sender", fields: [senderId], references: [id]) // Sender relationship
-  receiver   User              @relation("Receiver", fields: [receiverId], references: [id]) // Receiver relationship
-  reactions  MessageReaction[] // Reactions to the message
+  reactions  MessageReaction[]  // One-to-Many: A Message can have multiple MessageReactions
+  sender     User              @relation("Sender", fields: [senderId], references: [id]) // Many-to-One: Each Message has one Sender
+  receiver   User              @relation("Receiver", fields: [receiverId], references: [id]) // Many-to-One: Each Message has one Receiver
 }
 
-// Message Reaction model for reactions on messages
 model MessageReaction {
-  id        Int          @id @default(autoincrement()) // Unique ID for reaction
-  messageId Int // Message ID that is being reacted to
-  userId    Int // User ID who reacted
-  type      ReactionType // Type of reaction
+  id        Int          @id @default(autoincrement()) // Unique ID for reaction (Primary Key)
+  messageId Int          // Message ID that is being reacted to (Foreign Key)
+  userId    Int          // User ID who reacted (Foreign Key)
+  type      ReactionType // Type of reaction (like, love, etc.)
   createdAt DateTime     @default(now()) // Timestamp of when the reaction was made
-  // Relationships to Message and User
-  message   Message      @relation(fields: [messageId], references: [id]) // Link to Message
-  user      User         @relation(fields: [userId], references: [id]) // Link to User
+  message   Message      @relation(fields: [messageId], references: [id]) // Many-to-One: Each MessageReaction is linked to one Message
+  user      User         @relation(fields: [userId], references: [id]) // Many-to-One: Each MessageReaction is linked to one User
+
+  @@unique([userId, messageId]) // Ensure a User can react to a Message only once
 }
 
-// Search History model for tracking user searches
 model SearchHistory {
-  id        Int      @id @default(autoincrement()) // Unique ID for search history entry
-  userId    Int // User ID who made the search
-  query     String // Search query
+  id        Int      @id @default(autoincrement()) // Unique ID for search history entry (Primary Key)
+  userId    Int      // Foreign key to User (ID of the user who made the search, Foreign Key)
+  query     String   // Search query
   createdAt DateTime @default(now()) // Timestamp of when the search was made
-  // Relationship to User
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Each SearchHistory entry links to one User
 }
 
-// Saved Search model for saving user searches
 model SavedSearch {
-  id        Int      @id @default(autoincrement()) // Unique ID for saved search
-  userId    Int // User ID who saved the search
-  query     String // Search query
+  id        Int      @id @default(autoincrement()) // Unique ID for saved search (Primary Key)
+  userId    Int      // Foreign key to User (ID of the user who saved the search, Foreign Key)
+  query     String   // Search query
   createdAt DateTime @default(now()) // Timestamp of when the search was saved
-  // Relationship to User
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Each SavedSearch links to one User
 }
 
-// Wishlist model for storing user wishlist entries
 model Wishlist {
-  id        Int      @id @default(autoincrement()) // Unique ID for wishlist entry
-  userId    Int // User ID who owns the wishlist entry
-  productId Int // Product ID associated with this wishlist entry
+  id        Int      @id @default(autoincrement()) // Unique ID for wishlist entry (Primary Key)
+  userId    Int      // Foreign key to User (ID of the user who owns the wishlist entry, Foreign Key)
+  productId Int      // Foreign key to Product (ID of the product associated with this wishlist entry, Foreign Key)
   createdAt DateTime @default(now()) // Timestamp of when the entry was created
-  // Relationships to User and Product
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
-  product   Product  @relation(fields: [productId], references: [id]) // Link to Product
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Each Wishlist entry links to one User
+  product   Product  @relation(fields: [productId], references: [id]) // Many-to-One: Each Wishlist entry links to one Product
+
+  @@unique([userId, productId]) // Ensure a user can have only one wishlist entry per product
 }
 
-// Thread model for user discussions
 model Thread {
-  id        Int       @id @default(autoincrement()) // Unique ID for discussion thread
-  userId    Int // User ID who created the thread
-  title     String // Title of the thread
+  id        Int       @id @default(autoincrement()) // Unique ID for discussion thread (Primary Key)
+  userId    Int       // foreign key to User (ID of the user who created the thread, Foreign Key)
+  title     String    // Title of the thread
   createdAt DateTime  @default(now()) // Timestamp of when the thread was created
-  // Relationship to User
-  user      User      @relation(fields: [userId], references: [id]) // Link to User
-  // Comments on this thread
-  comments  Comment[] // Comments made on this thread
+  comments  Comment[] // One-to-Many: A Thread can have multiple Comments
+  user      User      @relation(fields: [userId], references: [id]) // Many-to-One: Each Thread links to one User
 }
 
-// Post model for user posts
 model Post {
-  id                Int              @id @default(autoincrement())
-  content           String
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  userId           Int
-  user             User              @relation(fields: [userId], references: [id])
-  reactions        PostReaction[]    @relation("PostReactions") // Relation to PostReaction
-  engagementMetrics EngagementMetric[] // Relationship to EngagementMetric
+  id                Int              @id @default(autoincrement()) // Unique ID for the post (Primary Key)
+  content           String           // Content of the post
+  createdAt        DateTime         @default(now()) // Timestamp of when the post was created
+  updatedAt        DateTime         @updatedAt // Timestamp for when the post was last updated
+  userId           Int              // User ID of the post's author (Foreign Key)
+  engagementMetrics EngagementMetric[] // One-to-Many: Metrics related to post engagement
+  reactions        PostReaction[]    @relation("PostReactions") // One-to-Many: A Post can have multiple Reactions
+  user             User              @relation(fields: [userId], references: [id]) // Many-to-One: Each Post links to one User
 }
 
-// Post Reaction model for reactions on user posts
 model PostReaction {
-  id        Int     @id @default(autoincrement())
-  userId    Int
-  postId    Int
-  type      ReactionType // Assuming you have a ReactionType enum defined
-  createdAt DateTime @default(now())
+  id        Int     @id @default(autoincrement()) // Unique ID for reaction (Primary Key)
+  userId    Int     // User ID who reacted (Foreign Key)
+  postId    Int     // Post ID that is being reacted to (Foreign Key)
+  type      ReactionType // Type of reaction (assuming ReactionType enum is defined)
+  createdAt DateTime @default(now()) // Timestamp of when the reaction was made
+  user      User   @relation("UserPostReactions", fields: [userId], references: [id]) // Many-to-One: A PostReaction links to one User
+  post      Post   @relation("PostReactions", fields: [postId], references: [id]) // Many-to-One: A PostReaction links to one Post
 
-  user      User   @relation("UserPostReactions", fields: [userId], references: [id]) // Relation to User
-  post      Post   @relation("PostReactions", fields: [postId], references: [id]) // Establishing the relation to Post
+  @@unique([userId, postId]) // Ensure a user can only react to a post once
 }
 
-// Poll model for user polls
 model Poll {
-  id        Int          @id @default(autoincrement()) // Unique ID for poll
-  userId    Int // User ID who created the poll
-  question  String // Poll question
+  id        Int          @id @default(autoincrement()) // Unique ID for poll (Primary Key)
+  userId    Int          // User ID who created the poll (Foreign Key)
+  question  String       // Poll question
   createdAt DateTime     @default(now()) // Timestamp of when the poll was created
-  // Relationship to User
-  user      User         @relation(fields: [userId], references: [id]) // Link to User
-  // Poll options
-  options   PollOption[] // Options available for this poll
-  votes     PollVote[] // Votes cast for the poll
+  options   PollOption[]  // One-to-Many: A poll can have multiple options
+  votes     PollVote[]    // One-to-Many: A poll can receive multiple votes
+  user      User         @relation(fields: [userId], references: [id]) // Many-to-One: A Poll links to one User
+
+  @@unique([userId, question]) // Ensure a user can create only one poll with a specific question
 }
 
-// Poll Option model for poll choices
 model PollOption {
-  id        Int        @id @default(autoincrement()) // Unique ID for option
-  pollId    Int // Poll ID this option belongs to
-  content   String // Option content
+  id        Int        @id @default(autoincrement()) // Unique ID for option (Primary Key)
+  pollId    Int        // Poll ID this option belongs to (Foreign Key)
+  content   String     // Option content
   createdAt DateTime   @default(now()) // Timestamp of when the option was created
-  // Relationship to Poll
-  poll      Poll       @relation(fields: [pollId], references: [id]) // Link to Poll
-  votes     PollVote[] // Votes for this option
+  votes     PollVote[] // One-to-Many: An option can receive multiple votes
+  poll      Poll       @relation(fields: [pollId], references: [id]) // Many-to-One: An option links to one Poll
+
+  @@unique([pollId, content]) // Ensure option content is unique within the same poll
 }
 
-// Poll Vote model for user votes on polls
 model PollVote {
-  id        Int      @id @default(autoincrement()) // Unique ID for vote
-  userId    Int // User ID who voted
-  pollId    Int // Poll ID that is being voted on
-  optionId  Int // Selected option ID
+  id        Int      @id @default(autoincrement()) // Unique ID for vote (Primary Key)
+  userId    Int      // User ID who voted (Foreign Key)
+  pollId    Int      // Poll ID that is being voted on (Foreign Key)
+  optionId  Int      // Selected option ID (Foreign Key)
   createdAt DateTime @default(now()) // Timestamp of when the vote was made
-  // Relationships to User, Poll, and PollOption
-  user   User       @relation(fields: [userId], references: [id]) // Link to User
-  poll   Poll       @relation(fields: [pollId], references: [id]) // Link to Poll
-  option PollOption @relation(fields: [optionId], references: [id]) // Link to PollOption
+  user      User       @relation(fields: [userId], references: [id]) // Many-to-One: A vote is linked to one User
+  poll      Poll       @relation(fields: [pollId], references: [id]) // Many-to-One: A vote is linked to one Poll
+  option    PollOption  @relation(fields: [optionId], references: [id]) // Many-to-One: A vote is linked to one PollOption
+
+  @@unique([userId, pollId]) // Ensure a user can vote in a poll only once
 }
 
-// Support Ticket model for user support requests
 model SupportTicket {
-  id        Int      @id @default(autoincrement()) // Unique ID for support ticket
-  userId    Int // User ID who created the ticket
-  subject   String // Subject of the support request
-  message   String // Detailed message content
-  status    String // Status of the ticket (e.g., open, closed)
+  id        Int      @id @default(autoincrement()) // Unique ID for support ticket (Primary Key)
+  userId    Int      // User ID who created the ticket (Foreign Key)
+  subject   String    // Subject of the support request
+  message   String    // Detailed message content
+  status    TicketStatus    // Status of the ticket (e.g., open, closed)
   createdAt DateTime @default(now()) // Timestamp of when the ticket was created
-  // Relationship to User
-  user      User     @relation(fields: [userId], references: [id]) // Link to User
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: A ticket links to one User
+
+  @@unique([userId, subject]) // Ensure a user can create only one ticket with a specific subject
 }
 
-// Badge model for tracking available badges
 model Badge {
-  id          Int         @id @default(autoincrement()) // Unique ID for badge
-  name        String // Name of the badge
-  description String // Description of the badge
+  id          Int         @id @default(autoincrement()) // Unique ID for badge (Primary Key)
+  name        String      // Name of the badge
+  description String      // Description of the badge
   createdAt   DateTime    @default(now()) // Timestamp of when the badge was created
-  // Relationships for UserBadges
-  userBadges  UserBadge[] // Badges earned by users
+  userBadges  UserBadge[] // One-to-Many: A badge can be earned by multiple users
+
+  @@unique(name) // Ensure each badge name is unique
 }
 
 model Review {
-  id          Int      @id @default(autoincrement()) // Unique ID for the review
-  productId   Int // Product ID being reviewed
-  userId      Int // User ID who wrote the review
-  rating      Int // Rating given by the user (e.g., 1 to 5 stars)
-  content     String // Review content
+  id          Int      @id @default(autoincrement()) // Unique ID for the review (Primary Key)
+  productId   Int      // Product ID being reviewed (Foreign Key)
+  userId      Int      // User ID who wrote the review (Foreign Key)
+  rating      Int      // Rating given by the user (e.g., 1 to 5 stars)
+  content     String   // Review content
   createdAt   DateTime @default(now()) // Timestamp of when the review was created
   updatedAt   DateTime @updatedAt // Timestamp of when the review was last updated
-  
-  // New field for review images
   imageUrls   String[] // Array of image URLs uploaded with the review
+  product     Product  @relation(fields: [productId], references: [id]) // Many-to-One: Many Reviews can belong to One Product
+  user        User     @relation(fields: [userId], references: [id]) // Many-to-One: Many Reviews can belong to One User
 
-  // Relationships to Product and User
-  product     Product @relation(fields: [productId], references: [id]) // Link to Product
-  user        User    @relation(fields: [userId], references: [id]) // Link to User
+  @@unique([productId, userId]) // Ensure a user can only review a product once
 }
 
-// Search Filter model for storing user search preferences
 model SearchFilter {
-  id        Int      @id @default(autoincrement()) // Unique ID for search filter
-  userId    Int // User ID who created the filter
-  filters   Json // JSON object containing filter criteria (e.g., categories, price range)
+  id        Int      @id @default(autoincrement()) // Unique ID for search filter (Primary Key)
+  userId    Int      // User ID who created the filter (Foreign Key)
+  filters   Json     // JSON object containing filter criteria (e.g., categories, price range)
   createdAt DateTime @default(now()) // Timestamp of when the filter was created
   updatedAt DateTime @updatedAt // Timestamp of when the filter was last updated
-  // Relationship to User
-  user User @relation(fields: [userId], references: [id]) // Link to User
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Many SearchFilters can belong to One User
 }
 
-// Product Rating model for tracking product ratings
 model ProductRating {
-  id        Int      @id @default(autoincrement()) // Unique ID for product rating
-  productId Int // Product ID that is being rated
-  userId    Int // User ID who gave the rating
-  rating    Int // Rating value (e.g., 1 to 5 stars)
+  id        Int      @id @default(autoincrement()) // Unique ID for product rating (Primary Key)
+  productId Int      // Product ID that is being rated (Foreign Key)
+  userId    Int      // User ID who gave the rating (Foreign Key)
+  rating    Int      // Rating value (e.g., 1 to 5 stars)
   createdAt DateTime @default(now()) // Timestamp of when the rating was created
-  // Relationships to Product and User
-  product Product @relation(fields: [productId], references: [id]) // Link to Product
-  user    User    @relation(fields: [userId], references: [id]) // Link to User
+  product   Product  @relation(fields: [productId], references: [id]) // Many-to-One: Many ProductRatings can belong to One Product
+  user      User     @relation(fields: [userId], references: [id]) // Many-to-One: Many ProductRatings can belong to One User
+
+  @@unique([productId, userId]) // Ensure a user can only rate a product once
 }
 
-// Localization
 model Language {
-  id          Int      @id @default(autoincrement()) // Unique ID for the language
+  id          Int      @id @default(autoincrement()) // Unique ID for the language (Primary Key)
   code        String   // Language code (e.g., 'en', 'fr', 'es')
   name        String   // Full name of the language
-  // Relationship to user preferences
-  users       User[]   // Users who prefer this language
+  userId  Int    // Foreign key for the user
+  user    User   @relation(fields: [userId], references: [id]) // One-to-Many: A Language can be preferred by multiple Users
+
+
+
+  @@unique(code) // Ensure each language code is unique
 }
 
-// User Preference model for storing various user preferences
 model UserPreference {
-  id          Int      @id @default(autoincrement()) // Unique ID for the preference entry
-  userId      Int      // User ID for preference
+  id          Int      @id @default(autoincrement()) // Unique ID for the preference entry (Primary Key)
+  userId      Int      // User ID for preference (Foreign Key)
   preferences Json      // JSON object to store various user preferences
-  createdAt   DateTime @default(now()) // Timestamp when the preference was created
-  updatedAt   DateTime @updatedAt // Timestamp when the preference was last updated
-  user        User     @relation(fields: [userId], references: [id]) // Link to User
+  createdAt   DateTime @default(now()) // Timestamp of when the preference was created
+  updatedAt   DateTime @updatedAt // Timestamp of when the preference was last updated
+  user        User     @relation(fields: [userId], references: [id]) // Many-to-One: A UserPreference links to One User
+
+  @@unique(userId) // Ensure a user can only have one set of preferences
 }
 
-// Tag model for categorizing products
 model Tag {
-  id        Int        @id @default(autoincrement()) // Unique ID for the tag
+  id        Int        @id @default(autoincrement()) // Unique ID for the tag (Primary Key)
   name      String     // Name of the tag
-  products  ProductTag[] @relation("ProductTags") // Relationship to ProductTag for linking tags with products
+  products  ProductTag[] @relation("ProductTags") // One-to-Many: A Tag can be associated with multiple ProductTags
+
+  @@unique(name) // Ensure each tag name is unique
 }
 
-// Product Tag model for linking products and tags
 model ProductTag {
-  id        Int      @id @default(autoincrement()) // Unique ID for the product-tag relationship
-  productId Int      // Foreign key to Product
-  tagId     Int      // Foreign key to Tag
-  product   Product  @relation(fields: [productId], references: [id]) // Link to Product
-  tag       Tag      @relation(fields: [tagId], references: [id], name: "ProductTags") // Link to Tag
+  id        Int      @id @default(autoincrement()) // Unique ID for the product-tag relationship (Primary Key)
+  productId Int      // Foreign key to Product (Foreign Key)
+  tagId     Int      // Foreign key to Tag (Foreign Key)
+  product   Product  @relation(fields: [productId], references: [id]) // Many-to-One: A product can have multiple tags
+  tag       Tag      @relation(fields: [tagId], references: [id], name: "ProductTags") // Many-to-One: A tag can belong to multiple products
+
+  @@unique([productId, tagId]) // Ensure a product can only have one instance of a specific tag
 }
 
-// Engagement Metric model for tracking user engagement actions
 model EngagementMetric {
-  id          Int      @id @default(autoincrement()) // Unique ID for the engagement metric entry
-  userId      Int      // User ID associated with the engagement
+  id          Int      @id @default(autoincrement()) // Unique ID for the engagement metric entry (Primary Key)
+  userId      Int      // User ID associated with the engagement (Foreign Key)
   productId   Int?     // Nullable: Foreign key to Product (if applicable)
   postId      Int?     // Nullable: Foreign key to Post (if applicable)
-  actionType  String   // Type of action (e.g., "view", "like", etc.)
+  actionType  String    // Type of action (e.g., "view", "like", etc.)
   createdAt   DateTime @default(now()) // Timestamp when the action was recorded
-  user        User     @relation(fields: [userId], references: [id]) // Link to User
-  product     Product? @relation(fields: [productId], references: [id]) // Optional link to Product
-  post        Post?    @relation(fields: [postId], references: [id]) // Optional link to Post
+  user        User     @relation(fields: [userId], references: [id]) // Many-to-One: Many EngagementMetrics can belong to One User
+  product     Product? @relation(fields: [productId], references: [id]) // Optional Many-to-One: Many EngagementMetrics can be associated with One Product
+  post        Post?    @relation(fields: [postId], references: [id]) // Optional Many-to-One: Many EngagementMetrics can be associated with One Post
+
+  @@unique([userId, productId, actionType]) // Ensure a user can perform the same action on a product only once
+  @@unique([userId, postId, actionType]) // Ensure a user can perform the same action on a post only once
 }
 
-// Moderation Report model for tracking user reports on content
 model ModerationReport {
-  id            Int      @id @default(autoincrement()) // Unique ID for each report
-  reportedById  Int      // ID of the user who reported the issue
+  id            Int      @id @default(autoincrement()) // Unique ID for each report (Primary Key)
+  reportedById  Int      // ID of the user who reported the issue (Foreign Key)
   targetId      Int      // ID of the target (user, product, etc.) being reported
   reason        String    // Description of the reason for the report
   status        String    // Current status of the report (e.g., "pending", "resolved")
   createdAt     DateTime @default(now()) // Timestamp when the report was created
-  updatedAt     DateTime @updatedAt // Timestamp when the report was last updated
-  reportedBy    User     @relation(fields: [reportedById], references: [id]) // Relationship to the User who reported
+  updatedAt     DateTime @updatedAt // Timestamp of when the report was last updated
+  reportedBy    User     @relation(fields: [reportedById], references: [id]) // Many-to-One: Many ModerationReports can be made by One User
+
+  @@unique([reportedById, targetId]) // Ensure a user can only report a specific target once
 }
 
-// Product Variant model for handling different variants of a product (like size and color)
 model ProductVariant {
-  id        Int           @id @default(autoincrement()) // Unique ID for each product variant
-  productId Int           // Foreign key linking to the Product
+  id        Int           @id @default(autoincrement()) // Unique ID for each product variant (Primary Key)
+  productId Int           // Foreign key linking to the Product (Foreign Key)
   size      String        // Size of the product variant (e.g., "M", "L")
   color     String        // Color of the product variant (e.g., "Red", "Blue")
-  inventories Inventory[]  @relation("VariantInventories") // List of inventories for this variant
-  product   Product       @relation(fields: [productId], references: [id]) // Relationship to the Product
+  inventories Inventory[]  @relation("VariantInventories") // One-to-Many: One ProductVariant can have Many Inventories
+  product   Product       @relation(fields: [productId], references: [id]) // Many-to-One: Many ProductVariants can belong to One Product
+
+  @@unique([productId, size, color]) // Ensure each combination of productId, size, and color is unique
 }
 
-// Inventory model for tracking stock levels of product variants
 model Inventory {
-  id        Int           @id @default(autoincrement()) // Unique ID for each inventory entry
-  variantId Int           // Foreign key linking to the ProductVariant
+  id        Int           @id @default(autoincrement()) // Unique ID for each inventory entry (Primary Key)
+  variantId Int           // Foreign key linking to the ProductVariant (Foreign Key)
   quantity  Int           // Number of items in stock for this variant
   createdAt DateTime      @default(now()) // Timestamp when the inventory entry was created
   updatedAt DateTime      @updatedAt // Timestamp when the inventory entry was last updated
-  variant   ProductVariant @relation("VariantInventories", fields: [variantId], references: [id]) // Relationship to ProductVariant
+  variant   ProductVariant @relation("VariantInventories", fields: [variantId], references: [id]) // Many-to-One: Relationship to ProductVariant
+
+  @@unique([variantId]) // Ensure each variant has unique inventory entry
 }
 
-// Achievement model for tracking achievements that users can earn
 model Achievement {
-  id          Int         @id @default(autoincrement()) // Unique ID for the achievement
+  id          Int         @id @default(autoincrement()) // Unique ID for the achievement (Primary Key)
   name        String      // Name of the achievement
   description String      // Description of what the achievement entails
   criteria    Json        // JSON object defining the criteria for earning the achievement
-  createdAt   DateTime    @default(now()) // Timestamp when the achievement was created
-  userAchievements UserAchievement[] // Relationships for user achievements
+  createdAt   DateTime    @default(now()) // Timestamp of when the achievement was created
+  userAchievements UserAchievement[] // One-to-Many: One Achievement can be earned by many UserAchievements
+
+  @@unique(name) // Ensure each achievement name is unique
 }
 
-// User Achievement model for linking users with the achievements they have earned
 model UserAchievement {
-  id            Int         @id @default(autoincrement()) // Unique ID for the user achievement entry
-  userId        Int         // ID of the user who earned the achievement
-  achievementId Int         // ID of the achievement that this entry relates to
+  id            Int         @id @default(autoincrement()) // Unique ID for the user achievement entry (Primary Key)
+  userId        Int         // ID of the user who earned the achievement (Foreign Key)
+  achievementId Int         // ID of the achievement that this entry relates to (Foreign Key)
   createdAt     DateTime    @default(now()) // Timestamp of when the achievement was earned
-  user          User        @relation(fields: [userId], references: [id]) // Link to the User
-  achievement   Achievement  @relation(fields: [achievementId], references: [id]) // Link to the Achievement
+  user          User        @relation(fields: [userId], references: [id]) // Many-to-One: Many UserAchievements can belong to One User
+  achievement   Achievement @relation(fields: [achievementId], references: [id]) // Many-to-One: Many UserAchievements can relate to One Achievement
+
+  @@unique([userId, achievementId]) // Ensure a user can only earn the same achievement once
 }
 
-// Leaderboard model for tracking user scores and rankings
 model Leaderboard {
-  id           Int        @id @default(autoincrement()) // Unique ID for each leaderboard entry
-  userId       Int        // ID of the user participating in the leaderboard
+  id           Int        @id @default(autoincrement()) // Unique ID for each leaderboard entry (Primary Key)
+  userId       Int        // ID of the user participating in the leaderboard (Foreign Key)
   score        Int        // Score based on various metrics (e.g., sales, reviews, etc.)
   createdAt    DateTime   @default(now()) // Timestamp when the entry was created
   updatedAt    DateTime   @updatedAt // Timestamp when the entry was last updated
-  user         User       @relation(fields: [userId], references: [id]) // Link to the User
+  user         User       @relation(fields: [userId], references: [id]) // Many-to-One: Many Leaderboard entries can belong to One User
+
+  @@unique(userId) // Ensure a user can only appear once in the leaderboard
 }
 
-// Represents a collection of products sold together as a bundle
 model Bundle {
-  id          Int      @id @default(autoincrement()) // Unique ID for each bundle
-  name        String   // The name of the bundle
-  description String?  // Optional description of the bundle
-  price       Float    // Total price of the bundle
-  createdAt   DateTime @default(now()) // Timestamp when the bundle was created
-  updatedAt   DateTime @updatedAt // Timestamp when the bundle was last updated
-  products    BundleProduct[] // List of products included in this bundle
+  id          Int            @id @default(autoincrement()) // Unique ID for each bundle (Primary Key)
+  name        String         // The name of the bundle
+  description String?        // Optional description of the bundle
+  price       Float          // Total price of the bundle
+  createdAt   DateTime       @default(now()) // Timestamp when the bundle was created
+  updatedAt   DateTime       @updatedAt // Timestamp when the bundle was last updated
+  products    BundleProduct[] // One-to-Many: One Bundle can include Many BundleProducts
+
+  @@unique(name) // Ensure each bundle name is unique
 }
 
-// Represents the relationship between bundles and individual products
 model BundleProduct {
-  id       Int     @id @default(autoincrement()) // Unique ID for each bundle-product relationship
-  bundleId Int     // ID of the associated bundle
-  productId Int    // ID of the associated product
+  id       Int     @id @default(autoincrement()) // Unique ID for each bundle-product relationship (Primary Key)
+  bundleId Int     // ID of the associated bundle (Foreign Key)
+  productId Int    // ID of the associated product (Foreign Key)
   quantity Int     // Number of this product included in the bundle
-  bundle   Bundle  @relation(fields: [bundleId], references: [id]) // Link to the Bundle
-  product  Product @relation(fields: [productId], references: [id]) // Link to the Product
+  bundle   Bundle  @relation(fields: [bundleId], references: [id]) // Many-to-One: Many BundleProducts can belong to One Bundle
+  product  Product @relation(fields: [productId], references: [id]) // Many-to-One: Many BundleProducts can belong to One Product
 }
