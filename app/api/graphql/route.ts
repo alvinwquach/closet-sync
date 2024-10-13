@@ -803,19 +803,31 @@ const { handleRequest } = createYoga({
       // Fetches all badges earned by a specific user.
       // SQL: SELECT * FROM userBadges WHERE userId = userId;
       getUserBadges: async (_, { userId }) => {
-        // Query the userBadge records
-        return await prisma.userBadge.findMany({
-          where: { userId }, // Filter by userId
-          include: { badge: true }, // Include details of each badge
-        });
+        try {
+          // Query the userBadge records
+          const badges = await prisma.userBadge.findMany({
+            where: { userId }, // Filter by userId
+            include: { badge: true }, // Include details of each badge
+          });
+          return badges; // Return the badges
+        } catch (error) {
+          console.error("Error fetching user badges:", error);
+          throw new Error("Failed to fetch user badges.");
+        }
       },
       // Fetches all achievements earned by a specific user.
       // SQL: SELECT * FROM userAchievements WHERE userId = userId;
       getUserAchievements: async (_, { userId }) => {
-        return await prisma.userAchievement.findMany({
-          where: { userId }, // Filter by userId
-          include: { achievement: true }, // Include achievement details
-        });
+        try {
+          const achievements = await prisma.userAchievement.findMany({
+            where: { userId }, // Filter by userId
+            include: { achievement: true }, // Include achievement details
+          });
+          return achievements; // Return the achievements
+        } catch (error) {
+          console.error("Error fetching user achievements:", error);
+          throw new Error("Failed to fetch user achievements.");
+        }
       },
 
       // Fetches all notifications for a specific user.
