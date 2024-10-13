@@ -624,34 +624,34 @@ const { handleRequest } = createYoga({
             where: { id: userId },
           });
         },
-        // Searches for users by username.
-        // SQL Query: SELECT * FROM users WHERE username LIKE :username;
-        searchUsersByUsername: async (
-          _: unknown,
-          { username }: { username: string }
-        ): Promise<User[]> => {
-          // SELECT * FROM users;
-          return await prisma.user.findMany({
-            // WHERE username LIKE :username
-            where: {
-              username: { contains: username, mode: "insensitive" },
-            },
-          });
-        },
-        // Searches for users by email.
-        // SQL Query: SELECT * FROM users WHERE email LIKE :email;
-        searchUsersByEmail: async (
-          _: unknown,
-          { email }: { email: string }
-        ): Promise<User[]> => {
-          // SELECT * FROM users;
-          return await prisma.user.findMany({
-            // WHERE email LIKE :email
-            where: {
-              email: { contains: email, mode: "insensitive" },
-            },
-          });
-        },
+        // // Searches for users by username.
+        // // SQL Query: SELECT * FROM users WHERE username LIKE :username;
+        // searchUsersByUsername: async (
+        //   _: unknown,
+        //   { username }: { username: string }
+        // ): Promise<User[]> => {
+        //   // SELECT * FROM users;
+        //   return await prisma.user.findMany({
+        //     // WHERE username LIKE :username
+        //     where: {
+        //       username: { contains: username, mode: "insensitive" },
+        //     },
+        //   });
+        // },
+        // // Searches for users by email.
+        // // SQL Query: SELECT * FROM users WHERE email LIKE :email;
+        // searchUsersByEmail: async (
+        //   _: unknown,
+        //   { email }: { email: string }
+        // ): Promise<User[]> => {
+        //   // SELECT * FROM users;
+        //   return await prisma.user.findMany({
+        //     // WHERE email LIKE :email
+        //     where: {
+        //       email: { contains: email, mode: "insensitive" },
+        //     },
+        //   });
+        // },
         // Fetches the most recently registered users.
         // SQL: SELECT * FROM users ORDER BY createdAt DESC LIMIT limit;
         // getRecentUsers: async (_, { limit }) => {
