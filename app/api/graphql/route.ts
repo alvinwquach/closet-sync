@@ -634,7 +634,7 @@ const { handleRequest } = createYoga({
         getUserUnreadNotifications(userId: Int!): [Notification!]! # Fetches all unread notifications for a specific user.
         # Languages and Profile Info
         getUserLanguage(userId: Int!): [Language!]! # Fetches all languages spoken by a specific user.
-        getUserProfileInfo(userId: Int!): UserProfileInfo! # Fetches the user's bio and profile information.
+        getUserProfileInfo(userId: Int!): User! # Fetches the user's bio and profile information.
         # User Ratings
         getUserRatings(userId: Int!): [UserRating!]! # Fetches all ratings associated with a specific user.
         getUserRatingsGiven(userId: Int!): [UserRating!]! # Fetches ratings given by a specific user.
