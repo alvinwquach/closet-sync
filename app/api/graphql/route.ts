@@ -800,24 +800,6 @@ const { handleRequest } = createYoga({
         },
       },
 
-      // Fetches all notifications for a specific user.
-      // SQL: SELECT * FROM notifications WHERE userId = userId;
-      getUserNotifications: async (_, { userId }) => {
-        // SELECT * FROM notifications;
-        return await prisma.notification.findMany({
-          // WHERE userId = userId
-          where: { userId },
-        });
-      },
-      // Fetches all notifications that are unread for a specific user.
-      // SQL: SELECT * FROM notifications WHERE userId = userId AND read = false;
-      getUserUnreadNotifications: async (_, { userId }) => {
-        // SELECT * FROM notifications;
-        return await prisma.notification.findMany({
-          // WHERE userId = userId AND read = false
-          where: { userId, read: false },
-        });
-      },
       // Fetches all languages spoken by a specific user.
       // SQL: SELECT * FROM languages WHERE userId = userId AND active = true;
       getUserLanguage: async (_, { userId }) => {
