@@ -605,7 +605,6 @@ const { handleRequest } = createYoga({
         getUserFavorites(userId: Int!): [Product!]! # Retrieve a list of products that a specific user has favorited.
         getUserViewedProducts(userId: Int!): [Product!]! # Retrieve a list of products that a specific user has viewed.
         getUserSearchHistory(userId: Int!): [SearchHistory!]! # Retrieve the search history of a specific user.
-        getUserFeedback(userId: Int!): [Feedback!]! # Retrieve all feedback submitted by a specific user.
         getUserSentMessages(userId: Int!): [Message!]! # Retrieve all messages sent by a specific user.
         getUserReceivedMessages(userId: Int!): [Message!]! # Retrieve all messages received by a specific user.
         # User Metrics and Statistics
@@ -742,15 +741,15 @@ const { handleRequest } = createYoga({
             include: { user: true },
           });
         },
-        // Fetches all feedback provided by a specific user.
-        // SQL: SELECT * FROM feedback WHERE userId = userId;
-        getUserFeedback: async (_, { userId }) => {
-          // SELECT * FROM feedback;
-          return await prisma.feedback.findMany({
-            // WHERE userId = userId
-            where: { userId },
-          });
-        },
+        // // Fetches all feedback provided by a specific user.
+        // // SQL: SELECT * FROM feedback WHERE userId = userId;
+        // getUserFeedback: async (_, { userId }) => {
+        //   // SELECT * FROM feedback;
+        //   return await prisma.feedback.findMany({
+        //     // WHERE userId = userId
+        //     where: { userId },
+        //   });
+        // },
         // Fetches all messages sent by a specific user.
         // SQL: SELECT * FROM messages WHERE senderId = userId;
         getUserSentMessages: async (_, { userId }) => {
