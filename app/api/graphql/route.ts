@@ -634,8 +634,8 @@ const { handleRequest } = createYoga({
         getAdminUsers: [User!]! # Fetches all users with the admin role.
         getModeratorUsers: [User!]! # Fetches all users with the moderator role.
         getRegularUsers: [User!]! # Fetches all users with the regular user role.
-        getUserRoles(userId: Int!): [String!]! # Fetches the role of a specific user.
-        getUsersByRole(role: String!): [User!]! # Fetches all users with the specified role.
+        getUserRoles(userId: Int!): [Role!]! # Fetches the role of a specific user.
+        getUsersByRole(role: Role!): [User!]! # Fetches all users with the specified role.
         # User Activity and Status
         getActiveUsers: [User!]! # Fetches all active users.
         getUserRoleStatistics: [[String]]! # Fetches user role statistics as an array of arrays
