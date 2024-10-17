@@ -194,13 +194,7 @@ const { handleRequest } = createYoga({
         badge: Badge # Badge related to the activity (if any). The Badge object can be null.
       }
 
-      type Feedback {
-        id: Int! # Unique feedback ID. Int is a signed 32-bit integer.
-        userId: Int! # ID of the user providing feedback. Int is a signed 32-bit integer.
-        message: String! # Feedback message content. String is a UTF-8 character sequence.
-        createdAt: DateTime! # Timestamp when feedback was submitted. DateTime is a custom scalar type.
-        user: User # User who provided the feedback. The User object can be null.
-      }
+  
 
       type Notification {
         id: Int! # Unique notification ID. Int is a signed 32-bit integer.
@@ -605,8 +599,7 @@ const { handleRequest } = createYoga({
         getUserViewedProducts(userId: Int!): [Product!]! # Fetch all products viewed by a specific user.
         # User Search History
         getUserSearchHistory(userId: Int!): [SearchHistory!]! # Retrieve the search history of a specific user.
-        # User Feedback
-        getUserFeedback(userId: Int!): [Feedback!]! # Fetch all feedback provided by a specific user.
+      
         # User Messages
         getUserSentMessages(userId: Int!): [Message!]! # Fetch all messages sent by a specific user.
         getUserReceivedMessages(userId: Int!): [Message!]! # Fetch all messages received by a specific user.
@@ -720,15 +713,7 @@ const { handleRequest } = createYoga({
             include: { user: true },
           });
         },
-        // Fetches all feedback provided by a specific user.
-        // SQL: SELECT * FROM feedback WHERE userId = userId;
-        getUserFeedback: async (_, { userId }) => {
-          // SELECT * FROM feedback;
-          return await prisma.feedback.findMany({
-            // WHERE userId = userId
-            where: { userId },
-          });
-        },
+     
         // Fetches all messages sent by a specific user.
         // SQL: SELECT * FROM messages WHERE senderId = userId;
         getUserSentMessages: async (_, { userId }) => {
