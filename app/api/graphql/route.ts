@@ -1123,6 +1123,7 @@ const { handleRequest } = createYoga({
             return newUser;
           } catch (error) {
             // Handle any errors that occur during user creation
+            console.error(error);
             throw new Error("Failed to create user. Please try again.");
           }
         },
