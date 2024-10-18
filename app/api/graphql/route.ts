@@ -1121,9 +1121,9 @@ const { handleRequest } = createYoga({
 
             // Return the newly created user object
             return newUser;
-          } catch (error) {
+          } catch (err) {
             // Handle any errors that occur during user creation
-            console.error(error);
+            console.error(err);
             throw new Error("Failed to create user. Please try again.");
           }
         },
