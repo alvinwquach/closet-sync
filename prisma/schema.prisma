@@ -131,6 +131,20 @@ enum ReactionType {
   APPLAUD // Applaud reaction
 }
 
+// Enum followstatus indicates the status of a follow request
+enum FollowStatus {
+  PENDING  // Request sent but not yet accepted
+  ACCEPTED // Request accepted
+  REJECTED // Request rejected
+}
+
+// Enum representing the status of a friendship request between users
+enum FriendStatus {
+  PENDING  // Request sent but not yet accepted
+  ACCEPTED // Request accepted
+  REJECTED // Request rejected
+}
+
 model User {
   // Unique identifier for each user
   id                Int                @id @default(autoincrement())
@@ -234,6 +248,10 @@ model User {
   addedByAdmin      Boolean            @default(false)
   // One-to-Many: One user can have many mentions 
   mentions          Mention[]          @relation("UserMentions")
+ // One-to-Many: One user can have many friends 
+  friends          UserFriend[]       @relation("UserFriends") 
+  // One-to-Many: One user can receive many friend requests 
+  friendOf         UserFriend[]       @relation("UserFriendOf") 
 
   // Ensures username and email are unique
   @@unique([username, email])
@@ -274,19 +292,38 @@ model UserActivity {
 }
 
 model UserFollow {
-  // Many-to-Many: One user can follow many users and be followed by many users
+  // Unique identifier for each follow record
   id         Int  @id @default(autoincrement())
   // User ID of the follower (Foreign Key)
-  followerId Int
+  followerId Int  // ID of the user who is following another user
   // User ID of the user being followed (Foreign Key)
-  followedId Int
-  // One user can follow many users
+  followedId Int  // ID of the user who is being followed
+  // Status of the follow request, indicating whether it's pending, accepted, or rejected
+  status     FollowStatus @default(PENDING) // Enum defining the status of the follow request
+  // One-to-One: Relation to the User model representing the user who is following
   follower   User @relation("UserFollows", fields: [followerId], references: [id])
-  // One user can be followed by many users
+  // One-to-One: Relation to the User model representing the user who is being followed
   followed   User @relation("UserFollowedBy", fields: [followedId], references: [id])
 
-  // Ensures unique follower-followed relationship
+  // Ensures a unique follower-followed relationship to prevent duplicate entries
   @@unique([followerId, followedId])
+}
+
+model UserFriend {
+  // Unique identifier for each friendship record
+  id         Int      @id @default(autoincrement())
+  // User ID of the user who initiated the friendship (Foreign Key)
+  userId     Int      // ID of the user who sent the friend request
+  // User ID of the user being befriended (Foreign Key)
+  friendId   Int      // ID of the user who received the friend request
+  // Status of the friendship, indicating whether it's pending, accepted, or rejected
+  status     FriendStatus @default(PENDING) // Enum defining the status of the friendship
+  // One-to-One: Relation to the User model representing the user who initiated the friendship
+  user       User     @relation("UserFriends", fields: [userId], references: [id])
+  // One-to-One: Relation to the User model representing the user who is being befriended
+  friend     User     @relation("UserFriendOf", fields: [friendId], references: [id])
+  // Ensures a unique relationship between user and friend to prevent duplicate entries
+  @@unique([userId, friendId])
 }
 
 model UserRating {
@@ -399,8 +436,12 @@ model Product {
   description       String
   // Optional cost of the product
   cost              Float?
+  // Retail price of the product (optional)
+  retail             Float
   // Price of the product
   price             Float
+   // Price for friends (optional)
+  friendsPrice Float?
   // Condition of the product (e.g., new, used)
   condition         Condition
   // Status of the product indicating its availability
