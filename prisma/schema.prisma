@@ -851,10 +851,10 @@ model Raffle {
   createdAt   DateTime      @default(now())
   // Timestamp for when the raffle ends
   endsAt      DateTime
-  // Product associated with the raffle
-  productId   Int
+  // Product associated with the raffle (optional)
+  productId   Int?
   // Many-to-One: A raffle is linked to one Product
-  product     Product       @relation(fields: [productId], references: [id])
+  product     Product?       @relation(fields: [productId], references: [id])
   // One-to-Many: A raffle can have multiple entries
   entries     RaffleEntry[]
 }
