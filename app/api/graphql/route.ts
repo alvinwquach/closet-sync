@@ -6,6 +6,11 @@ const prisma = new PrismaClient();
 
 import bcrypt from "bcrypt";
 
+interface GraphQLContext {
+  user: { id: number; role: Role; supabaseUserId: string } | null;
+  prisma: PrismaClient;
+}
+
 const dateScalar = new GraphQLScalarType({
   name: "Date",
   description: "Date custom scalar type",
@@ -84,20 +89,26 @@ const dateTimeScalar = new GraphQLScalarType({
   },
 });
 
-const { handleRequest } = createYoga({
+const { handleRequest } = createYoga<GraphQLContext>({
   schema: createSchema({
     typeDefs: /* GraphQL */ `
       scalar Date
       scalar DateTime
       scalar JSON
       # Represents different user roles in the application.
+
       enum Role {
         SUPERADMIN # Me
         ADMIN # Admin user with elevated permissions.
         MODERATOR # Moderator with limited administrative capabilities.
         USER # Regular user with standard access.
-        BANNED # Cannot post, comment or list products
-        MUTED # Temporarily silenced (e.g. for spam)
+      }
+
+      enum UserStatus {
+        ACTIVE # User is fully active with no restrictions
+        MUTED # User is temporarily silenced (e.g., cannot post or comment)
+        BANNED # User is banned (e.g., cannot post, comment, or list products)
+        SUSPENDED # User is temporarily restricted
       }
 
       # Represents the condition of a product.
@@ -147,6 +158,7 @@ const { handleRequest } = createYoga({
         supabaseUserId: String! # Supabase user ID. String cannot be null.
         email: String! # User's email address. String cannot be null.
         password: String! # User's hashed password. String cannot be null.
+        status: UserStatus! # User's status (e.g., ACTIVE, MUTED). Cannot be null.
         role: Role! # User's role (ADMIN, MODERATOR, USER). Role cannot be null.
         username: String! # User's unique username. String cannot be null.
         products: [Product!]! # List of user's products. The list cannot be null, and each Product cannot be null.
@@ -656,7 +668,8 @@ const { handleRequest } = createYoga({
       }
 
       type Mutation {
-        signUp(input: SignUpInput!): User! # Mutation for user signup
+        signUp(input: SignUpInput!): User! # Creates a new user upon signing up
+        updateUserRole(userId: Int!, newRole: Role!): User! # Updates a user role
       }
     `,
     resolvers: {
@@ -1081,6 +1094,20 @@ const { handleRequest } = createYoga({
           });
         },
       },
+      /**
+       * Creates a new user account
+       *
+       * @param {Object} input - Required input object containing user details
+       * @param {string} input.email - Email address of the user (must be unique)
+       * @param {string} input.username - Username chosen by the user (must be unique)
+       * @param {string} [input.password] - Password for email/password authentication
+       * @param {string} input.supabaseUserId - Supabase authentication user ID
+       * @throws {Error} If required fields are missing
+       * @throws {Error} If email or username already exists
+       * @returns {User} The newly created user object
+       *
+       * Note: The first user to sign up becomes SUPERADMIN, subsequent users become regular USERS
+       */
       Mutation: {
         signUp: async (_, { input }) => {
           // Destructure input fields from the request
@@ -1117,6 +1144,7 @@ const { handleRequest } = createYoga({
                 password: hashedPassword ?? "", // bcrypt hash if available, or empty string
                 supabaseUserId, // Store Supabase UID for linking auth
                 role, // Either SUPERADMIN (if first user) or USER
+                status: "ACTIVE", // Default status              },
               },
             });
             // Return the newly created user
@@ -1126,6 +1154,87 @@ const { handleRequest } = createYoga({
             console.error("Sign-up error:", err);
             throw new Error("Failed to sign up. Please try again.");
           }
+        },
+        /**
+         * Updates a user's role in the system
+         *
+         * @param {string} userId - The ID of the user whose role will be updated
+         * @param {Role} newRole - The new role to assign to the user
+         * @throws {Error} If unauthorized, invalid role, or user not found
+         * @returns {User} The updated user object
+         */
+        updateUserRole: async (_, { userId, newRole }, { prisma, user }) => {
+          // Authentication Check
+          if (!user) {
+            throw new Error(
+              "Unauthorized: You must be logged in to update user roles."
+            );
+          }
+
+          // Get the current user's role for permission checks
+          const currentUserRole = user.role;
+
+          // Retrieve the target user to check existence and current role
+          const targetUser = await prisma.user.findUnique({
+            where: { id: userId },
+          });
+
+          if (!targetUser) {
+            throw new Error("User not found.");
+          }
+
+          // Role Update Permissions Logic
+          if (currentUserRole === Role.SUPERADMIN) {
+            // SUPERADMIN can assign any role except SUPERADMIN
+            if (!["ADMIN", "MODERATOR", "USER"].includes(newRole)) {
+              throw new Error(
+                "Invalid role: SUPERADMIN can only assign ADMIN, MODERATOR, or USER roles."
+              );
+            }
+          } else if (currentUserRole === Role.ADMIN) {
+            // ADMIN cannot modify SUPERADMIN roles
+            if (targetUser.role === Role.SUPERADMIN) {
+              throw new Error(
+                "Unauthorized: ADMIN cannot modify SUPERADMIN roles."
+              );
+            }
+
+            // ADMIN role assignment restrictions
+            if (newRole === Role.SUPERADMIN || newRole === Role.ADMIN) {
+              throw new Error(
+                "Unauthorized: ADMIN can only assign MODERATOR or USER roles."
+              );
+            }
+
+            // ADMIN can only promote USER to MODERATOR
+            if (targetUser.role === Role.USER && newRole !== Role.MODERATOR) {
+              throw new Error(
+                "Unauthorized: ADMIN can only promote USER to MODERATOR."
+              );
+            }
+
+            // ADMIN can only demote MODERATOR to USER
+            if (targetUser.role === Role.MODERATOR && newRole !== Role.USER) {
+              throw new Error(
+                "Unauthorized: ADMIN can only demote MODERATOR to USER."
+              );
+            }
+          } else {
+            // Only SUPERADMIN and ADMIN can update roles
+            throw new Error(
+              "Unauthorized: Only SUPERADMIN or ADMIN can update user roles."
+            );
+          }
+
+          // Perform the role update
+          // UPDATE "User" SET "role" = $1 WHERE id = $2
+          // WHERE $1 is the new role value and $2 is the userId
+          const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { role: newRole },
+          });
+
+          return updatedUser;
         },
       },
     },
