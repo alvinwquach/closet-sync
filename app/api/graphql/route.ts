@@ -1081,48 +1081,52 @@ const { handleRequest } = createYoga({
           });
         },
       },
-      signUp: async (_, { input }) => {
-        // Destructure input fields from the request
-        const { email, username, password, supabaseUserId } = input;
-        // === Validate required fields ===
-        if (!email || !username || !supabaseUserId) {
-          // Throw an error if any of the required fields are missing
-          throw new Error("Email, username, and supabaseUserId are required.");
-        }
-        try {
-          // === Hash password if provided (for email/password signups) ===
-          let hashedPassword: string | null = null;
-          if (password) {
-            // Hash the password securely using bcrypt with a salt round of 10
-            hashedPassword = await bcrypt.hash(password, 10);
+      Mutation: {
+        signUp: async (_, { input }) => {
+          // Destructure input fields from the request
+          const { email, username, password, supabaseUserId } = input;
+          // === Validate required fields ===
+          if (!email || !username || !supabaseUserId) {
+            // Throw an error if any of the required fields are missing
+            throw new Error(
+              "Email, username, and supabaseUserId are required."
+            );
           }
-          // === Check how many users exist in the database ===
-          const existingUserCount = await prisma.user.count();
+          try {
+            // === Hash password if provided (for email/password signups) ===
+            let hashedPassword: string | null = null;
+            if (password) {
+              // Hash the password securely using bcrypt with a salt round of 10
+              hashedPassword = await bcrypt.hash(password, 10);
+            }
+            // === Check how many users exist in the database ===
+            const existingUserCount = await prisma.user.count();
 
-          // The very first user who signs up becomes a SUPERADMIN.
-          // All other users default to USER role.
-          const role = existingUserCount === 0 ? Role.SUPERADMIN : Role.USER;
+            // The very first user who signs up becomes a SUPERADMIN.
+            // All other users default to USER role.
+            const role = existingUserCount === 0 ? Role.SUPERADMIN : Role.USER;
 
-          /*
-            INSERT INTO User (email, username, password, supabaseId, role)
-            VALUES ('user@email.com', 'username123', 'hashed_password_here', 'supabase_uid_here', 'SUPERADMIN' or 'USER');
-          */
-          const newUser = await prisma.user.create({
-            data: {
-              email,
-              username,
-              password: hashedPassword ?? "", // bcrypt hash if available, or empty string
-              supabaseUserId, // Store Supabase UID for linking auth
-              role, // Either SUPERADMIN (if first user) or USER
-            },
-          });
-          // Return the newly created user
-          return newUser;
-        } catch (err) {
-          // Log and throw error if anything fails during the creation process
-          console.error("Sign-up error:", err);
-          throw new Error("Failed to sign up. Please try again.");
-        }
+            /*
+              INSERT INTO User (email, username, password, supabaseId, role)
+              VALUES ('user@email.com', 'username123', 'hashed_password_here', 'supabase_uid_here', 'SUPERADMIN' or 'USER');
+            */
+            const newUser = await prisma.user.create({
+              data: {
+                email,
+                username,
+                password: hashedPassword ?? "", // bcrypt hash if available, or empty string
+                supabaseUserId, // Store Supabase UID for linking auth
+                role, // Either SUPERADMIN (if first user) or USER
+              },
+            });
+            // Return the newly created user
+            return newUser;
+          } catch (err) {
+            // Log and throw error if anything fails during the creation process
+            console.error("Sign-up error:", err);
+            throw new Error("Failed to sign up. Please try again.");
+          }
+        },
       },
     },
   }),
