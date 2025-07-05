@@ -648,7 +648,7 @@ const { handleRequest } = createYoga({
       }
 
       # Input type for creating a new user
-      input CreateUserInput {
+      input SignUpInput {
         email: String! # Required email field
         username: String! # Required username field
         password: String! # Required password field
