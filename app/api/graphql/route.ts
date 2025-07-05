@@ -102,8 +102,6 @@ const { handleRequest } = createYoga<GraphQLContext>({
         ADMIN # Admin user with elevated permissions.
         MODERATOR # Moderator with limited administrative capabilities.
         USER # Regular user with standard access.
-        BANNED # Cannot post, comment or list products
-        MUTED # Temporarily silenced (e.g. for spam)
       }
 
       enum UserStatus {
