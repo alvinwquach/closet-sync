@@ -144,7 +144,7 @@ const { handleRequest } = createYoga({
 
       type User {
         id: Int! # Unique user ID. Int is a signed 32-bit integer and cannot be null.
-        supabaseUserId: String! Supabase user Id Int is a signed 32-bit integer and cannot be null. 
+        supabaseUserId: String! # Supabase user ID. String cannot be null.
         email: String! # User's email address. String cannot be null.
         password: String! # User's hashed password. String cannot be null.
         role: Role! # User's role (ADMIN, MODERATOR, USER). Role cannot be null.
