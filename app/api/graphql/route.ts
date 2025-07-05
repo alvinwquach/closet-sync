@@ -92,9 +92,12 @@ const { handleRequest } = createYoga({
       scalar JSON
       # Represents different user roles in the application.
       enum Role {
+        SUPERADMIN # Me
         ADMIN # Admin user with elevated permissions.
         MODERATOR # Moderator with limited administrative capabilities.
         USER # Regular user with standard access.
+        BANNED # Cannot post, comment or list products
+        MUTED # Temporarily silenced (e.g. for spam)
       }
 
       # Represents the condition of a product.
@@ -141,6 +144,7 @@ const { handleRequest } = createYoga({
 
       type User {
         id: Int! # Unique user ID. Int is a signed 32-bit integer and cannot be null.
+        supabaseUserId: Int! Supabase user Id Int is a signed 32-bit integer and cannot be null. 
         email: String! # User's email address. String cannot be null.
         password: String! # User's hashed password. String cannot be null.
         role: Role! # User's role (ADMIN, MODERATOR, USER). Role cannot be null.
@@ -159,6 +163,9 @@ const { handleRequest } = createYoga({
         comments: [Comment!] # User's comments. The list can be null, and each Comment can also be null.
         userBadges: [UserBadge!] # Badges earned by the user. The list can be null, and each UserBadge can also be null.
         supportTickets: [SupportTicket!] # Support tickets created by the user. The list can be null, and each SupportTicket can also be null.
+        mutedUntil: DateTime
+        bannedUntil: DateTime
+        strikeCount: Int!
       }
 
       type UserFollow {
@@ -642,14 +649,13 @@ const { handleRequest } = createYoga({
 
       # Input type for creating a new user
       input CreateUserInput {
-        phrase: String # Optional phrase field for role assignment
         email: String! # Required email field
         username: String! # Required username field
         password: String! # Required password field
       }
 
       type Mutation {
-        createUser(input: CreateUserInput!): User! # Mutation to create a user
+        signUp(input: SignUpInput!): User! # Mutation for user signup
       }
     `,
     resolvers: {
@@ -1074,59 +1080,48 @@ const { handleRequest } = createYoga({
           });
         },
       },
-      Mutation: {
-        createUser: async (_, { input }) => {
-          // Destructure the input to get phrase, email, username, and password
-          const { phrase, email, username, password } = input;
-
-          // Check if a phrase has been provided for admin or moderator access
-          let role: Role = Role.USER; // Default role is USER
-
-          if (phrase) {
-            // Compare the provided phrase against the environment variable for ADMIN
-            if (phrase === process.env.ADMIN_PHRASE) {
-              role = Role.ADMIN; // Set role to ADMIN if phrase matches
-            }
-            // Compare the provided phrase against the environment variable for MODERATOR
-            else if (phrase === process.env.MODERATOR_PHRASE) {
-              role = Role.MODERATOR; // Set role to MODERATOR if phrase matches
-            }
-            // If the phrase doesn't match either, throw an error
-            else {
-              throw new Error("Invalid phrase for admin or moderator role.");
-            }
+      signUp: async (_, { input }) => {
+        // Destructure input fields from the request
+        const { email, username, password, supabaseUserId } = input;
+        // === Validate required fields ===
+        if (!email || !username || !supabaseUserId) {
+          // Throw an error if any of the required fields are missing
+          throw new Error("Email, username, and supabaseUserId are required.");
+        }
+        try {
+          // === Hash password if provided (for email/password signups) ===
+          let hashedPassword: string | null = null;
+          if (password) {
+            // Hash the password securely using bcrypt with a salt round of 10
+            hashedPassword = await bcrypt.hash(password, 10);
           }
+          // === Check how many users exist in the database ===
+          const existingUserCount = await prisma.user.count();
 
-          // Ensure email, username, and password are provided; if not, throw an error
-          if (!email || !username || !password) {
-            throw new Error("Email, username, and password are required.");
-          }
+          // The very first user who signs up becomes a SUPERADMIN.
+          // All other users default to USER role.
+          const role = existingUserCount === 0 ? Role.SUPERADMIN : Role.USER;
 
-          try {
-            // Hash the password using bcrypt
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            /*
-              INSERT INTO User (email, password, role, username) 
-              VALUES ('email_value', 'hashed_password', 'role_value', 'username_value');
-            */
-            const newUser = await prisma.user.create({
-              data: {
-                email,
-                password: hashedPassword,
-                role,
-                username,
-              },
-            });
-
-            // Return the newly created user object
-            return newUser;
-          } catch (err) {
-            // Handle any errors that occur during user creation
-            console.error(err);
-            throw new Error("Failed to create user. Please try again.");
-          }
-        },
+          /*
+            INSERT INTO User (email, username, password, supabaseId, role)
+            VALUES ('user@email.com', 'username123', 'hashed_password_here', 'supabase_uid_here', 'SUPERADMIN' or 'USER');
+          */
+          const newUser = await prisma.user.create({
+            data: {
+              email,
+              username,
+              password: hashedPassword ?? "", // bcrypt hash if available, or empty string
+              supabaseUserId, // Store Supabase UID for linking auth
+              role, // Either SUPERADMIN (if first user) or USER
+            },
+          });
+          // Return the newly created user
+          return newUser;
+        } catch (err) {
+          // Log and throw error if anything fails during the creation process
+          console.error("Sign-up error:", err);
+          throw new Error("Failed to sign up. Please try again.");
+        }
       },
     },
   }),

@@ -16,9 +16,12 @@ datasource db {
 
 // Enum Role represents the different user roles in the system
 enum Role {
+  SUPERADMIN // Me
   ADMIN // Admin user with elevated permissions
   MODERATOR // Moderator with limited administrative capabilities
   USER // Regular user with standard access
+  BANNED // Cannot post, comment or list products
+  MUTED // Temporarily silenced (e.g. for spam)
 }
 
 // Enum Condition represents the different conditions a product can be in
@@ -148,6 +151,8 @@ enum FriendStatus {
 model User {
   // Unique identifier for each user
   id                Int                @id @default(autoincrement())
+  // UUID from Supabase auth.users.id
+  supabaseUserId     String  @unique
   // User's email address (must be unique)
   email             String             @unique
   // User's password (hashed for security)
@@ -355,6 +360,9 @@ model Badge {
   createdAt   DateTime    @default(now())
   // One-to-Many: One Badge can be earned by multiple UserBadges
   userBadges  UserBadge[]
+  mutedUntil   DateTime?
+  bannedUntil  DateTime?
+  strikeCount  Int      @default(0)
 
   // Ensure each badge name is unique
   @@unique(name)
