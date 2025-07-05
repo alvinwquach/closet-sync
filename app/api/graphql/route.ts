@@ -158,7 +158,7 @@ const { handleRequest } = createYoga<GraphQLContext>({
         supabaseUserId: String! # Supabase user ID. String cannot be null.
         email: String! # User's email address. String cannot be null.
         password: String! # User's hashed password. String cannot be null.
-        status: UserStatus! User's status. Status cannot be null.
+        status: UserStatus! # User's status (e.g., ACTIVE, MUTED). Cannot be null.
         role: Role! # User's role (ADMIN, MODERATOR, USER). Role cannot be null.
         username: String! # User's unique username. String cannot be null.
         products: [Product!]! # List of user's products. The list cannot be null, and each Product cannot be null.
