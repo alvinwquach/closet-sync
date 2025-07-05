@@ -20,8 +20,14 @@ enum Role {
   ADMIN // Admin user with elevated permissions
   MODERATOR // Moderator with limited administrative capabilities
   USER // Regular user with standard access
-  BANNED // Cannot post, comment or list products
-  MUTED // Temporarily silenced (e.g. for spam)
+}
+
+// Enum UserStatus represents the status the user has in the system
+enum UserStatus {
+  ACTIVE // User is fully active with no restrictions
+  MUTED // User is temporarily silenced (e.g., cannot post or comment)
+  BANNED // User is banned (e.g., cannot post, comment, or list products)
+  SUSPENDED // User is temporarily restricted 
 }
 
 // Enum Condition represents the different conditions a product can be in
@@ -159,6 +165,8 @@ model User {
   password          String
   // Role of the user (e.g., admin, regular user)
   role              Role               @default(USER)
+  // Status of the user (e.g. active, muted)
+  status UserStatus
   // Unique username for the user
   username          String             @unique
   // Timestamp for when the user account was created
