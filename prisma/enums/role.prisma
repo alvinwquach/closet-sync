@@ -1,0 +1,7 @@
+// Enum Role represents the different user roles in the system
+enum Role {
+  SUPERADMIN // Me
+  ADMIN // Admin user with elevated permissions
+  MODERATOR // Moderator with limited administrative capabilities
+  USER // Regular user with standard access
+}

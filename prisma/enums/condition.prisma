@@ -1,0 +1,11 @@
+// Enum Condition represents the different conditions a product can be in
+enum Condition {
+  BRAND_NEW // Product is brand new
+  TRIED_ON // Product has been tried on but not used
+  NEW_WITH_DEFECTS // New product with defects
+  NEW_WITH_TAGS // New product still with tags
+  NEW_WITHOUT_TAGS // New product without tags
+  USED // Used product
+  IN_BOX // Product is in its original box
+  NO_BOX // Product is without its box
+}

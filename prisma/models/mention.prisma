@@ -1,0 +1,14 @@
+model Mention {
+  // Unique ID for the mention (Primary Key)
+  id            Int      @id @default(autoincrement())
+  // Post ID that the mention is associated with
+  postId        Int
+  // User ID that is being mentioned
+  userId        Int
+  // Timestamp of when the mention was made
+  createdAt     DateTime @default(now())
+  // Many-to-One: Each Mention links back to a Post
+  postMentioned Post?    @relation("PostMentions", fields: [postId], references: [id])
+  // Many-to-One: Each Mention links to a User
+  userMentioned User?    @relation("UserMentions", fields: [userId], references: [id])
+}

@@ -1,0 +1,12 @@
+model SavedSearch {
+  // Unique ID for saved search (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // Foreign key to User (ID of the user who saved the search, Foreign Key)
+  userId    Int
+  // Search query
+  query     String
+  // Timestamp of when the search was saved
+  createdAt DateTime @default(now())
+  // Many-to-One: Each SavedSearch links to one User
+  user      User     @relation(fields: [userId], references: [id])
+}

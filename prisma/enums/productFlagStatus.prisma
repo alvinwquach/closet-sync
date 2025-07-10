@@ -1,0 +1,8 @@
+// Enum FlagStatus represents the status of a product flag
+enum ProductFlagStatus {
+  REPORTED // Product has been flagged and is pending review
+  UNDER_REVIEW // Product is currently being reviewed by an admin or moderator
+  RESOLVED // Flag has been reviewed and the issue has been addressed
+  IGNORED // Flag has been reviewed but deemed not a valid issue
+  REMOVED // Product has been removed from the marketplace
+}

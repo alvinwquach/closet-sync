@@ -1,0 +1,17 @@
+model UserAchievement {
+  // Unique ID for the user achievement entry (Primary Key)
+  id            Int         @id @default(autoincrement())
+  // ID of the user who earned the achievement (Foreign Key)
+  userId        Int
+  // ID of the achievement that this entry relates to (Foreign Key)
+  achievementId Int
+  // Timestamp of when the achievement was earned
+  createdAt     DateTime    @default(now())
+  // One-to-Many: Many UserAchievements can belong to one User
+  user          User        @relation(fields: [userId], references: [id])
+  // Many-to-One: Many UserAchievements can relate to one Achievement
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  // Ensure a user can only earn the same achievement once
+  @@unique([userId, achievementId])
+}

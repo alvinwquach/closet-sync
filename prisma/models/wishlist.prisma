@@ -1,0 +1,17 @@
+model Wishlist {
+  // Unique ID for wishlist entry (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // Foreign key to User (ID of the user who owns the wishlist entry, Foreign Key)
+  userId    Int
+  // Foreign key to Product (ID of the product associated with this wishlist entry, Foreign Key)
+  productId Int
+  // Timestamp of when the entry was created
+  createdAt DateTime @default(now())
+  // Many-to-One: Each Wishlist entry links to one User
+  user      User     @relation(fields: [userId], references: [id])
+  // Many-to-One: Each Wishlist entry links to one Product
+  product   Product  @relation(fields: [productId], references: [id])
+
+  // Ensure a user can have only one wishlist entry per product
+  @@unique([userId, productId])
+}

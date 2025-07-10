@@ -1,0 +1,32 @@
+model Post {
+  // Unique ID for the post (Primary Key)
+  id                Int                @id @default(autoincrement())
+  // Content of the post
+  content           String
+  // Timestamp of when the post was created
+  createdAt         DateTime           @default(now())
+  // Timestamp for when the post was last updated
+  updatedAt         DateTime           @updatedAt
+  // User ID of the post's author (Foreign Key)
+  userId            Int
+  // ID of the parent post (null if it's a main post)
+  parentPostId      Int?
+  // ID of the quoted post (null if not a quote)
+  quotedPostId      Int?
+  // One-to-Many: Metrics related to post engagement
+  engagementMetrics EngagementMetric[]
+  // One-to-Many: A Post can have multiple Reactions
+  reactions         PostReaction[]     @relation("PostReactions")
+  // Many-to-One: Each Post links to one User
+  user              User               @relation(fields: [userId], references: [id])
+  // Many-to-One: Each Reply links back to a Post
+  parentPost        Post?              @relation("PostReplies", fields: [parentPostId], references: [id])
+  // One-to-Many: Replies to this post
+  replies           Post[]             @relation("PostReplies") // One post can have many replies
+  // Many-to-One: Each quoted post links back to a Post
+  quotedPost        Post?              @relation("PostQuotes", fields: [quotedPostId], references: [id])
+  // One-to-Many: Each post can be quoted by many posts
+  quotedBy          Post[]             @relation("PostQuotes")
+  // One-to-Many: Each post can have multiple mentions
+  mentions          Mention[]          @relation("PostMentions")
+}

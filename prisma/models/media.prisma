@@ -1,0 +1,14 @@
+model Media {
+  // Unique ID for media entry
+  id        Int      @id @default(autoincrement())
+  // Product ID that this media belongs to
+  productId Int
+  // URL of the media file (e.g., image, video)
+  url       String
+  // Type of media (image, video, etc.)
+  type      String
+  // Timestamp of when the media was added
+  createdAt DateTime @default(now())
+  // Many-to-One: Each media entry is linked to one Product
+  product   Product  @relation(fields: [productId], references: [id])
+}

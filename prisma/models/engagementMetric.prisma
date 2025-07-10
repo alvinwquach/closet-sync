@@ -1,0 +1,25 @@
+model EngagementMetric {
+  // Unique ID for the engagement metric entry (Primary Key)
+  id         Int      @id @default(autoincrement())
+  // User ID associated with the engagement (Foreign Key)
+  userId     Int
+  // Nullable: Foreign key to Product (if applicable)
+  productId  Int?
+  // Nullable: Foreign key to Post (if applicable)
+  postId     Int?
+  // Type of action (e.g., "view", "like", etc.)
+  actionType String
+  // Timestamp when the action was recorded
+  createdAt  DateTime @default(now())
+  // Many EngagementMetrics can belong to one User
+  user       User     @relation(fields: [userId], references: [id])
+  // Optional: Many EngagementMetrics can be associated with one Product
+  product    Product? @relation(fields: [productId], references: [id])
+  // Optional: Many EngagementMetrics can be associated with one Post
+  post       Post?    @relation(fields: [postId], references: [id])
+
+  // Ensure a user can perform the same action on a product only once
+  @@unique([userId, productId, actionType])
+  // Ensure a user can perform the same action on a post only once
+  @@unique([userId, postId, actionType])
+}

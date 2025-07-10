@@ -1,0 +1,13 @@
+model ThreadCategory {
+  // Foreign key to Thread
+  threadId   Int
+  // Foreign key to Category
+  categoryId Int
+  // Many-to-One: Many ThreadCategories belong to one Thread
+  thread     Thread    @relation("ThreadToCategory", fields: [threadId], references: [id])
+  // Many-to-One: Many ThreadCategories belong to one Category
+  category   Category  @relation("CategoryToThread", fields: [categoryId], references: [id])
+
+  // Composite primary key
+  @@id([threadId, categoryId])
+}

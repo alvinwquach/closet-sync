@@ -1,0 +1,17 @@
+model UserBadge {
+  // Unique ID for the user badge (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // User ID who earned the badge (Foreign Key)
+  userId    Int
+  // Badge ID that this entry relates to (Foreign Key)
+  badgeId   Int
+  // Timestamp of when the badge was earned
+  createdAt DateTime @default(now())
+  // One-to-Many: One User can earn many UserBadges
+  user      User     @relation(fields: [userId], references: [id])
+  // Many-to-One: One Badge can be earned by many UserBadges
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+
+  // Ensures a user can earn a badge only once
+  @@unique([userId, badgeId])
+}

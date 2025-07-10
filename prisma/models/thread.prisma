@@ -1,0 +1,14 @@
+model Thread {
+  // Unique ID for discussion thread (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // Foreign key to User (ID of the user who created the thread)
+  userId    Int
+  // Title of the thread
+  title     String
+  // Timestamp of when the thread was created
+  createdAt DateTime @default(now())
+  // Many-to-Many: Threads can belong to multiple categories
+  categories ThreadCategory[] @relation("ThreadToCategory")
+  // Many-to-One: Each Thread links to one User
+  user User @relation(fields: [userId], references: [id])
+}

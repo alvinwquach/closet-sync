@@ -1,0 +1,19 @@
+model PostReaction {
+  // Unique ID for reaction (Primary Key)
+  id        Int          @id @default(autoincrement())
+  // User ID who reacted (Foreign Key)
+  userId    Int
+  // Post ID that is being reacted to (Foreign Key)
+  postId    Int
+  // Type of reaction (assuming ReactionType enum is defined)
+  type      ReactionType
+  // Timestamp of when the reaction was made
+  createdAt DateTime     @default(now())
+  // Many-to-One: A PostReaction links to one User
+  user      User         @relation("UserPostReactions", fields: [userId], references: [id])
+  // Many-to-One: A PostReaction links to one Post
+  post      Post         @relation("PostReactions", fields: [postId], references: [id])
+
+  // Ensure a user can react to a post only once
+  @@unique([userId, postId])
+}

@@ -1,0 +1,20 @@
+model Sale {
+  // Unique identifier for the sale (Primary Key)
+  id         Int        @id @default(autoincrement())
+  // ID of the product sold (Foreign Key)
+  productId  Int
+  // ID of the user making the sale (Foreign Key)
+  userId     Int
+  // Quantity sold
+  quantity   Int
+  // Total price of the sale      
+  totalPrice Float
+  // Timestamp of the sale
+  soldAt     DateTime   @default(now())
+  // Many-to-One: Many Sales refer to one Product
+  product    Product    @relation("ProductSales", fields: [productId], references: [id])
+  // Many-to-One: Many Sales are made by one User
+  user       User       @relation("UserSales", fields: [userId], references: [id])
+  // One-to-Many: One Sale can be linked to multiple Purchases
+  purchases  Purchase[] @relation("SalePurchases")
+}

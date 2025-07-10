@@ -1,0 +1,6 @@
+// Enum followstatus indicates the status of a follow request
+enum FollowStatus {
+  PENDING  // Request sent but not yet accepted
+  ACCEPTED // Request accepted
+  REJECTED // Request rejected
+}

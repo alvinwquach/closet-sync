@@ -1,0 +1,10 @@
+model Country {
+  // Unique ID for the country (Primary Key)
+  id       Int       @id @default(autoincrement())
+  // Name of the country
+  name     String
+  // One-to-Many: A country can have multiple associated products
+  products Product[]
+    // One-to-Many: A country can have multiple raffles
+  raffles   Raffle[] @relation("CountryRaffles")
+}

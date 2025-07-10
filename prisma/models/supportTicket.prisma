@@ -1,0 +1,19 @@
+model SupportTicket {
+  // Unique ID for support ticket (Primary Key)
+  id        Int          @id @default(autoincrement())
+  // User ID who created the ticket (Foreign Key)
+  userId    Int
+  // Subject of the support request
+  subject   String
+  // Detailed message content
+  message   String
+  // Status of the ticket (e.g., open, closed)
+  status    TicketStatus
+  // Timestamp of when the ticket was created
+  createdAt DateTime     @default(now())
+  // Many-to-One: Many SupportTickets can be created by One User
+  user      User         @relation(fields: [userId], references: [id])
+
+  // Ensure a user can create only one ticket with a specific subject
+  @@unique([userId, subject])
+}

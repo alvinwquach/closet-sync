@@ -1,0 +1,19 @@
+model MessageReaction {
+    // Unique ID for reaction (Primary Key)
+    id        Int          @id @default(autoincrement())
+    // Message ID that is being reacted to (Foreign Key)
+    messageId Int
+    // User ID who reacted (Foreign Key)
+    userId    Int
+    // Type of reaction (like, love, etc.)
+    type      ReactionType
+    // Timestamp of when the reaction was made
+    createdAt DateTime     @default(now())
+    // Many-to-One: Each MessageReaction is linked to one Message
+    message   Message      @relation(fields: [messageId], references: [id])
+    // Many-to-One: Each MessageReaction is linked to one User
+    user      User         @relation(fields: [userId], references: [id])
+  
+    // Ensure a User can react to a Message only once
+    @@unique([userId, messageId])
+  }

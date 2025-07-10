@@ -1,0 +1,17 @@
+model ProductVariant {
+  // Unique ID for each product variant (Primary Key)
+  id          Int         @id @default(autoincrement())
+  // Foreign key linking to the Product (Foreign Key)
+  productId   Int
+  // Size of the product variant (e.g., "M", "L")
+  size        String
+  // Color of the product variant (e.g., "Red", "Blue")
+  color       String
+  // One-to-Many: One ProductVariant can have many Inventories
+  inventories Inventory[] @relation("VariantInventories")
+  // Many-to-One: Many ProductVariants can belong to one Product
+  product     Product     @relation(fields: [productId], references: [id])
+
+  // Ensure each combination of productId, size, and color is unique
+  @@unique([productId, size, color])
+}

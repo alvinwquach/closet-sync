@@ -1,0 +1,21 @@
+model PollVote {
+  // Unique ID for vote (Primary Key)
+  id        Int        @id @default(autoincrement())
+  // User ID who voted (Foreign Key)
+  userId    Int
+  // Poll ID that is being voted on (Foreign Key)
+  pollId    Int
+  // Selected option ID (Foreign Key)
+  optionId  Int
+  // Timestamp of when the vote was made
+  createdAt DateTime   @default(now())
+  // Many-to-One: A vote is linked to one User
+  user      User       @relation(fields: [userId], references: [id])
+  // Many-to-One: A vote is linked to one Poll
+  poll      Poll       @relation(fields: [pollId], references: [id])
+  // Many-to-One: A vote is linked to one PollOption
+  option    PollOption @relation(fields: [optionId], references: [id])
+
+  // Ensure a user can vote in a poll only once
+  @@unique([userId, pollId])
+}

@@ -1,0 +1,13 @@
+model ProductCategory {
+  // Foreign key to Product
+  productId  Int
+  // Foreign key to Category
+  categoryId Int
+  // Many-to-One: Many ProductCategories belong to one Product
+  product    Product  @relation(fields: [productId], references: [id])
+  // Many-to-One: Many ProductCategories belong to one Category
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // Composite primary key
+  @@id([productId, categoryId])
+}

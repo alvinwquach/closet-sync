@@ -1,0 +1,21 @@
+model Comment {
+  // Unique ID for comment (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // Product ID the comment is associated with (Foreign Key)
+  productId Int
+  // User ID of the commenter (Foreign Key)
+  userId    Int
+  // Optional Thread ID the comment is associated with (Foreign Key)
+  threadId  Int?
+  // Content of the comment
+  content   String
+  // Timestamp of when the comment was created
+  createdAt DateTime @default(now())
+  // Many-to-One: Each comment is linked to one User
+  user      User     @relation(fields: [userId], references: [id])
+  // Many-to-One: Each comment is linked to one Product
+  product   Product  @relation(fields: [productId], references: [id])
+
+  // Ensure a user can only comment once per Product
+  @@unique([userId, productId])
+}

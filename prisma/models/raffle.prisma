@@ -1,0 +1,30 @@
+model Raffle {
+  // Unique ID for the raffle
+  id          Int           @id @default(autoincrement())
+  // Title of the raffle
+  title       String
+  // Detailed description
+  description String
+  // Type of the raffle
+  type        RaffleType
+  // Current status of the raffle
+  status      RaffleStatus
+  // Optional link for online entries
+  entryUrl    String?
+  // Timestamp for when the raffle was created
+  createdAt   DateTime      @default(now())
+  // Timestamp for when the raffle ends
+  endsAt      DateTime?
+  // Product associated with the raffle (optional)
+  productId   Int?
+  // Many-to-One: A raffle is linked to one Product
+  product     Product?      @relation(fields: [productId], references: [id])
+  // ID of the country (optional, Foreign Key)
+  countryId   Int?          
+  // Many-to-One: A raffle may be linked to one country (optional)
+  country     Country?      @relation("CountryRaffles", fields: [countryId], references: [id])
+  // Indicates if the raffle is worldwide
+  isWorldwide  Boolean       @default(false)
+  // One-to-Many: A raffle can have multiple entries
+  entries     RaffleEntry[]
+}

@@ -1,0 +1,15 @@
+model ProductTag {
+  // Unique ID for the product-tag relationship (Primary Key)
+  id        Int     @id @default(autoincrement())
+  // Foreign key to Product
+  productId Int
+  // Foreign key to Tag
+  tagId     Int
+  // Many-to-One: Many ProductTags belong to one Product
+  product   Product @relation(fields: [productId], references: [id])
+  // Many-to-One: Many ProductTags belong to one Tag
+  tag       Tag     @relation(fields: [tagId], references: [id], name: "ProductTags")
+
+  // Ensure a product can only have one instance of a specific tag
+  @@unique([productId, tagId])
+}

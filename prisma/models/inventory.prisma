@@ -1,0 +1,17 @@
+model Inventory {
+  // Unique ID for each inventory entry (Primary Key)
+  id        Int            @id @default(autoincrement())
+  // Foreign key linking to the ProductVariant (Foreign Key)
+  variantId Int
+  // Number of items in stock for this variant
+  quantity  Int
+  // Timestamp when the inventory entry was created
+  createdAt DateTime       @default(now())
+  // Timestamp when the inventory entry was last updated
+  updatedAt DateTime       @updatedAt
+  // Many-to-One: Many Inventory entries can belong to one ProductVariant
+  variant   ProductVariant @relation("VariantInventories", fields: [variantId], references: [id])
+
+  // Ensure each variant has a unique inventory entry
+  @@unique([variantId])
+}

@@ -1,0 +1,80 @@
+model Product {
+  // Unique ID for the product (Primary Key)
+  id                Int                @id @default(autoincrement())
+  // Title of the product
+  title             String
+  // Description of the product
+  description       String
+  // Optional cost of the product
+  cost              Float?
+  // Retail price of the product (optional)
+  retail             Float
+  // Price of the product
+  price             Float
+   // Price for friends (optional)
+  friendsPrice Float?
+  // Condition of the product (e.g., new, used)
+  condition         Condition
+  // Status of the product indicating its availability
+  status            ProductStatus      @default(ACTIVE)
+  // Timestamp for when the product was created
+  createdAt         DateTime           @default(now())
+  // Timestamp for when the product was sold (optional)
+  soldAt            DateTime?
+  // Release date of the product (optional)
+  releaseDate       DateTime?
+  // ID of the seller (Foreign Key)
+  sellerId          Int
+  // Indicates if the product has a raffle
+  hasRaffle         Boolean            @default(false)
+  // ID of the country (optional, Foreign Key)
+  countryId         Int?
+  // ID of the brand (optional, Foreign Key)
+  brandId           Int?
+  // One-to-Many: One seller can list many products
+  seller            User               @relation(fields: [sellerId], references: [id])
+  // Many-to-Many: Many users can favorite many products
+  favoritedBy       User[]             @relation("Favorites")
+  // Many-to-Many: Many users can view many products
+  viewedBy          User[]             @relation("ViewedProducts")
+  // One-to-Many: One product can have many historical price records
+  priceHistory      PriceHistory[]
+  // One-to-Many: One product can have many raffles
+  raffles           Raffle[]
+  // One-to-Many: One product can have many media entries
+  media             Media[]
+  // Many-to-One: One product may be linked to one country (optional)
+  country           Country?           @relation(fields: [countryId], references: [id])
+  // Many-to-One: One product may be linked to one brand (optional)
+  brand             Brand?             @relation(fields: [brandId], references: [id])
+  // One-to-Many: One product can have many ratings
+  ratings           ProductRating[]
+  // One-to-Many: One product can have many reports
+  reports           Report[]
+  // One-to-Many: One product can have many comments
+  comments          Comment[]
+  // One-to-Many: One product can be wishlisted by many users
+  wishlistedBy      Wishlist[]
+  // One-to-Many: One product can have many reviews
+  reviews           Review[]
+  // One-to-Many: One product can have many engagement metrics
+  engagementMetrics EngagementMetric[]
+  // Many-to-Many: One product can have many tags
+  tags              ProductTag[]
+  // One-to-Many: One product can have many variants
+  variants          ProductVariant[]
+  // One-to-Many: One product can be included in many bundles
+  bundles           ProductBundle[]
+  // One-to-Many: One product can belong to many categories
+  categories        ProductCategory[]
+  // Available quantity of the product
+  quantity          Int
+  // Stock level of the product (optional)
+  stock             Int?
+  // One-to-Many: One product can have many sales
+  sales             Sale[]             @relation("ProductSales")
+  // One-to-Many: One product can be included in many purchases
+  purchases         Purchase[]         @relation("ProductPurchases")
+  // One-to-Many: One product can have many flags
+  flags             ProductFlag[]      @relation("ProductFlags")
+}

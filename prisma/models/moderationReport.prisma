@@ -1,0 +1,21 @@
+model ModerationReport {
+  // Unique ID for each report (Primary Key)
+  id           Int      @id @default(autoincrement())
+  // ID of the user who reported the issue (Foreign Key)
+  reportedById Int
+  // ID of the target (user, product, etc.) being reported
+  targetId     Int
+  // Description of the reason for the report
+  reason       String
+  // Current status of the report (e.g., "pending", "resolved")
+  status       String
+  // Timestamp when the report was created
+  createdAt    DateTime @default(now())
+  // Timestamp when the report was last updated
+  updatedAt    DateTime @updatedAt
+  // Many ModerationReports can be made by one User
+  reportedBy   User     @relation(fields: [reportedById], references: [id])
+
+  // Ensure a user can only report a specific target once
+  @@unique([reportedById, targetId])
+}

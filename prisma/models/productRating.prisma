@@ -1,0 +1,19 @@
+model ProductRating {
+  // Unique ID for product rating (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // Foreign key to the Product that is being rated
+  productId Int
+  // Foreign key to the User who gave the rating
+  userId    Int
+  // Rating value (e.g., 1 to 5 stars)
+  rating    Int
+  // Timestamp of when the rating was created
+  createdAt DateTime @default(now())
+  // Many-to-One: Many ProductRatings can belong to one Product
+  product   Product  @relation(fields: [productId], references: [id])
+  // Many-to-One: Many ProductRatings can belong to one User
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Ensure a user can only rate a product once
+  @@unique([productId, userId])
+}

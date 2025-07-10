@@ -1,0 +1,6 @@
+// Enum RaffleResult indicates the outcome of a raffle entry
+enum RaffleResult {
+  WON // User won the raffle
+  LOST // User lost the raffle
+  PENDING // Raffle outcome is still pending
+}

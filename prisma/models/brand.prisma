@@ -1,0 +1,8 @@
+model Brand {
+  // Unique ID for the brand (Primary Key)
+  id       Int       @id @default(autoincrement())
+  // Name of the brand
+  name     String
+  // One-to-Many: A brand can have many associated products
+  products Product[]
+}

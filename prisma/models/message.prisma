@@ -1,0 +1,18 @@
+model Message {
+  // Unique ID for message (Primary Key)
+  id         Int               @id @default(autoincrement())
+  // User ID of the sender (Foreign Key)
+  senderId   Int
+  // User ID of the receiver (Foreign Key)
+  receiverId Int
+  // Content of the message
+  content    String
+  // Timestamp of when the message was sent
+  createdAt  DateTime          @default(now())
+  // One-to-Many: A Message can have multiple MessageReactions
+  reactions  MessageReaction[]
+  // Many-to-One: Each Message has one Sender
+  sender     User              @relation("Sender", fields: [senderId], references: [id])
+  // Many-to-One: Each Message has one Receiver
+  receiver   User              @relation("Receiver", fields: [receiverId], references: [id])
+}

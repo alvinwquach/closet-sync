@@ -1,0 +1,17 @@
+model PollOption {
+  // Unique ID for option (Primary Key)
+  id        Int        @id @default(autoincrement())
+  // Foreign key to the Poll this option belongs to
+  pollId    Int
+  // Option content
+  content   String
+  // Timestamp of when the option was created
+  createdAt DateTime   @default(now())
+  // One-to-Many: One option can receive multiple votes
+  votes     PollVote[]
+  // Many-to-One: An option links to one Poll
+  poll      Poll       @relation(fields: [pollId], references: [id])
+
+  // Ensure option content is unique within the same poll
+  @@unique([pollId, content])
+}

@@ -1,0 +1,17 @@
+model UserFollow {
+  // Unique identifier for each follow record
+  id         Int  @id @default(autoincrement())
+  // User ID of the follower (Foreign Key)
+  followerId Int  // ID of the user who is following another user
+  // User ID of the user being followed (Foreign Key)
+  followedId Int  // ID of the user who is being followed
+  // Status of the follow request, indicating whether it's pending, accepted, or rejected
+  status     FollowStatus @default(PENDING) // Enum defining the status of the follow request
+  // One-to-One: Relation to the User model representing the user who is following
+  follower   User @relation("UserFollows", fields: [followerId], references: [id])
+  // One-to-One: Relation to the User model representing the user who is being followed
+  followed   User @relation("UserFollowedBy", fields: [followedId], references: [id])
+
+  // Ensures a unique follower-followed relationship to prevent duplicate entries
+  @@unique([followerId, followedId])
+}

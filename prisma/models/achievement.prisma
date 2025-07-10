@@ -1,0 +1,15 @@
+model Achievement {
+  // Unique ID for the achievement (Primary Key)
+  id               Int               @id @default(autoincrement())
+  // Name of the achievement
+  name             String
+  // Description of what the achievement entails
+  description      String
+  // JSON object defining the criteria for earning the achievement
+  criteria         Json
+  // One-to-Many: One Achievement can be earned by many UserAchievements
+  userAchievements UserAchievement[]
+
+  // Ensure each achievement name is unique
+  @@unique(name)
+}

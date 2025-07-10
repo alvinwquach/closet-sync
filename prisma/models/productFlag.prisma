@@ -1,0 +1,21 @@
+model ProductFlag {
+  // Unique identifier for the flag (Primary Key)
+  id          Int               @id @default(autoincrement())
+  // ID of the associated product (Foreign Key)
+  productId   Int
+  // Reason for flagging the product (e.g., fake)
+  reason      ProductFlagReason
+  // Status of the flag (e.g., reported, resolved)
+  status      ProductFlagStatus @default(REPORTED)
+  // Timestamp of when the flag was created
+  createdAt   DateTime          @default(now())
+  // ID of the user who created the flag (Foreign Key)
+  createdById Int
+  // Many-to-One: User who created the flag
+  createdBy   User              @relation("UserProductFlags", fields: [createdById], references: [id])
+  // Many-to-One: Product being flagged
+  product     Product           @relation("ProductFlags", fields: [productId], references: [id])
+
+  // Unique constraint to ensure a user can only flag the same product for the same reason once
+  @@unique([productId, reason, createdById])
+}

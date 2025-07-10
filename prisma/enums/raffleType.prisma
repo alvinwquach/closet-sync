@@ -1,0 +1,6 @@
+// Enum RaffleType indicates the types of raffles available
+enum RaffleType {
+  IN_APP // Raffle can be entered within the app
+  ONLINE // Raffle can be entered online
+  IN_STORE // Raffle can be entered in physical stores
+}
