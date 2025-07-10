@@ -1,0 +1,6 @@
+// Enum ProductStatus represents the availability of a product
+enum ProductStatus {
+  ACTIVE // Product is available for sale
+  DEACTIVATED // Product is temporarily removed from the marketplace but can be reactivated
+  BANNED // Product is permanently banned from the marketplace
+}

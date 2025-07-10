@@ -1,0 +1,15 @@
+model UserActivity {
+  // Many-to-One: Many activities can belong to one user
+  id        Int      @id @default(autoincrement())
+  // User ID associated with this activity (Foreign Key)
+  userId    Int
+  // Description of the action taken by the user
+  action    String
+  // Timestamp of when the action occurred
+  createdAt DateTime @default(now())
+  // Activity is related to one user
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Ensures unique activities for a user at the same timestamp
+  @@unique([userId, createdAt])
+}

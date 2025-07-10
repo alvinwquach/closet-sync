@@ -1,0 +1,17 @@
+model UserRating {
+  // Unique ID for the user rating (Primary Key)
+  id      Int  @id @default(autoincrement())
+  // User ID of the person giving the rating (Foreign Key)
+  raterId Int
+  // User ID of the person receiving the rating (Foreign Key)
+  ratedId Int
+  // Rating value (e.g., 1-5)
+  rating  Int
+  // One user can give many ratings
+  rater   User @relation("RatingsGiven", fields: [raterId], references: [id])
+  // One user can receive many ratings
+  rated   User @relation("RatingsReceived", fields: [ratedId], references: [id])
+
+  // Ensures unique rating from one user to another
+  @@unique([raterId, ratedId])
+}

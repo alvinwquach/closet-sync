@@ -1,0 +1,14 @@
+model SearchFilter {
+  // Unique ID for search filter (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // User ID who created the filter (Foreign Key)
+  userId    Int
+  // JSON object containing filter criteria
+  filters   Json
+  // Timestamp of when the filter was created
+  createdAt DateTime @default(now())
+  // Timestamp of when the filter was last updated
+  updatedAt DateTime @updatedAt
+  // Many SearchFilters can belong to one User
+  user      User     @relation(fields: [userId], references: [id])
+}

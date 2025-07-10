@@ -1,0 +1,19 @@
+model Poll {
+  // Unique ID for poll (Primary Key)
+  id        Int          @id @default(autoincrement())
+  // User ID who created the poll (Foreign Key)
+  userId    Int
+  // Poll question
+  question  String
+  // Timestamp of when the poll was created
+  createdAt DateTime     @default(now())
+  // One-to-Many: A Poll can have multiple options
+  options   PollOption[]
+  // One-to-Many: A Poll can receive multiple votes
+  votes     PollVote[]
+  // Many-to-One: A Poll links to one User
+  user      User         @relation(fields: [userId], references: [id])
+
+  // Ensure a user can create only one poll with a specific question
+  @@unique([userId, question])
+}

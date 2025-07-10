@@ -1,0 +1,6 @@
+// Enum representing the status of a friendship request between users
+enum FriendStatus {
+  PENDING  // Request sent but not yet accepted
+  ACCEPTED // Request accepted
+  REJECTED // Request rejected
+}

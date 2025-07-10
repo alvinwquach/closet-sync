@@ -1,0 +1,21 @@
+model Report {
+  // Unique ID for report (Primary Key)
+  id            Int      @id @default(autoincrement())
+  // Product ID that is being reported (Foreign Key)
+  productId     Int
+  // User ID who is reporting (Foreign Key)
+  userId        Int
+  // Reason for the report
+  reason        String
+  // Timestamp of when the report was filed
+  createdAt     DateTime @default(now())
+  // User ID that has been blocked (optional, Foreign Key)
+  blockedUserId Int?
+  // Many-to-One: Each report is linked to one User
+  user          User     @relation(fields: [userId], references: [id])
+  // Many-to-One: Each report is linked to one Product
+  product       Product  @relation(fields: [productId], references: [id])
+
+  // Ensure a user can report the same Product only once
+  @@unique([userId, productId])
+}

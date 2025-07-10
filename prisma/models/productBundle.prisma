@@ -1,0 +1,14 @@
+model ProductBundle {
+  // Unique ID for each product bundle relationship (Primary Key)
+  id        Int     @id @default(autoincrement())
+  // ID of the associated bundle (Foreign Key)
+  bundleId  Int
+  // ID of the associated product (Foreign Key)
+  productId Int
+  // Number of this product included in the bundle
+  quantity  Int
+  // Many-to-One: Many ProductBundles can belong to one Bundle
+  bundle    Bundle  @relation(fields: [bundleId], references: [id])
+  // Many-to-One: Many ProductBundles can belong to one Product
+  product   Product @relation(fields: [productId], references: [id])
+}

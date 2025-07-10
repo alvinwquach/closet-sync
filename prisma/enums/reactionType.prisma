@@ -1,0 +1,15 @@
+// Enum ReactionType defines the types of reactions a user can give
+enum ReactionType {
+  LIKE // Like reaction
+  LOVE // Love reaction
+  WOW // Wow reaction
+  SAD // Sad reaction
+  ANGRY // Angry reaction
+  CHEER // Cheer reaction
+  LAUGH // Laugh reaction
+  SURPRISE // Surprise reaction
+  DISLIKE // Dislike reaction
+  CONFUSED // Confused reaction
+  GRATEFUL // Grateful reaction
+  APPLAUD // Applaud reaction
+}

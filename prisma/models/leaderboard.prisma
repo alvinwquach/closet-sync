@@ -1,0 +1,17 @@
+model Leaderboard {
+  // Unique ID for each leaderboard entry (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // ID of the user participating in the leaderboard (Foreign Key)
+  userId    Int
+  // Score based on various metrics (e.g., sales, reviews, etc.)
+  score     Int
+  // Timestamp when the entry was created
+  createdAt DateTime @default(now())
+  // Timestamp when the entry was last updated
+  updatedAt DateTime @updatedAt
+  // Many Leaderboard entries can belong to one User
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Ensure a user can only appear once in the leaderboard
+  @@unique(userId)
+}

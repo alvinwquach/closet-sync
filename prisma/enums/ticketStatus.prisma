@@ -1,0 +1,7 @@
+// Enum TicketStatus indicates the status of a support ticket
+enum TicketStatus {
+  OPEN // The ticket has been created and is awaiting attention
+  IN_PROGRESS // The ticket is currently being addressed by support staff
+  RESOLVED // The issue has been resolved, and the ticket is waiting for confirmation
+  CLOSED // The ticket has been officially closed after resolution
+}

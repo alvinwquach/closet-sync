@@ -1,0 +1,14 @@
+model Notification {
+  // Unique ID for notification (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // User ID to receive this notification (Foreign Key)
+  userId    Int
+  // Notification message content
+  message   String
+  // Timestamp of when the notification was created
+  createdAt DateTime @default(now())
+  // Indicates if the notification has been read
+  read      Boolean  @default(false)
+  // Many-to-One: Many notifcations is related to one User
+  user      User     @relation(fields: [userId], references: [id])
+}

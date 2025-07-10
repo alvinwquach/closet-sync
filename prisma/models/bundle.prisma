@@ -1,0 +1,19 @@
+model Bundle {
+  // Unique ID for each bundle (Primary Key)
+  id          Int             @id @default(autoincrement())
+  // The name of the bundle
+  name        String
+  // Optional description of the bundle
+  description String?
+  // Total price of the bundle
+  price       Float
+  // Timestamp when the bundle was created
+  createdAt   DateTime        @default(now())
+  // Timestamp when the bundle was last updated
+  updatedAt   DateTime        @updatedAt
+  // One-to-Many: One Bundle can include many ProductBundles
+  products    ProductBundle[]
+
+  // Ensure each bundle name is unique
+  @@unique(name)
+}

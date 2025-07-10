@@ -1,0 +1,20 @@
+model Purchase {
+  // Unique identifier for the purchase (Primary Key)
+  id        Int      @id @default(autoincrement())
+  // ID of the associated sale (Foreign Key)
+  saleId    Int
+  // ID of the user making the purchase (Foreign Key)
+  userId    Int
+  // ID of the product purchased (Foreign Key)
+  productId Int
+  // Timestamp of the purchase
+  createdAt DateTime @default(now())
+  // Timestamp of when the item was sold (same as sale time)
+  soldAt    DateTime
+  // Many-to-One: Many Purchases are linked to one Sale
+  sale      Sale     @relation("SalePurchases", fields: [saleId], references: [id])
+  // Many-to-One: Many Purchases are made by one User
+  user      User     @relation("UserPurchases", fields: [userId], references: [id])
+  // Many-to-One: Many Purchases are for one Product
+  product   Product  @relation("ProductPurchases", fields: [productId], references: [id])
+}

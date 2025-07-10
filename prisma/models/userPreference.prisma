@@ -1,0 +1,17 @@
+model UserPreference {
+  // One-to-One: One user can have one set of preferences
+  id          Int      @id @default(autoincrement())
+  // User ID for preference (Foreign Key)
+  userId      Int
+  // JSON object to store various user preferences
+  preferences Json
+  // Timestamp of when the preference was created
+  createdAt   DateTime @default(now())
+  // Timestamp of when the preference was last updated
+  updatedAt   DateTime @updatedAt
+  // Many UserPreferences can belong to one User
+  user        User     @relation(fields: [userId], references: [id])
+
+  // Ensure a user can only have one set of preferences
+  @@unique(userId)
+}

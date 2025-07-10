@@ -1,0 +1,16 @@
+model UserFriend {
+  // Unique identifier for each friendship record
+  id         Int      @id @default(autoincrement())
+  // User ID of the user who initiated the friendship (Foreign Key)
+  userId     Int      // ID of the user who sent the friend request
+  // User ID of the user being befriended (Foreign Key)
+  friendId   Int      // ID of the user who received the friend request
+  // Status of the friendship, indicating whether it's pending, accepted, or rejected
+  status     FriendStatus @default(PENDING) // Enum defining the status of the friendship
+  // One-to-One: Relation to the User model representing the user who initiated the friendship
+  user       User     @relation("UserFriends", fields: [userId], references: [id])
+  // One-to-One: Relation to the User model representing the user who is being befriended
+  friend     User     @relation("UserFriendOf", fields: [friendId], references: [id])
+  // Ensures a unique relationship between user and friend to prevent duplicate entries
+  @@unique([userId, friendId])
+}

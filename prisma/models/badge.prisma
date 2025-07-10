@@ -1,0 +1,18 @@
+model Badge {
+  // Unique ID for badge (Primary Key)
+  id          Int         @id @default(autoincrement())
+  // Name of the badge
+  name        String
+  // Description of the badge
+  description String
+  // Timestamp of when the badge was created
+  createdAt   DateTime    @default(now())
+  // One-to-Many: One Badge can be earned by multiple UserBadges
+  userBadges  UserBadge[]
+  mutedUntil   DateTime?
+  bannedUntil  DateTime?
+  strikeCount  Int      @default(0)
+
+  // Ensure each badge name is unique
+  @@unique(name)
+}

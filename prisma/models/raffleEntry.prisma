@@ -1,0 +1,19 @@
+model RaffleEntry {
+  // Unique ID for entry
+  id        Int          @id @default(autoincrement())
+  // User ID of the entrant
+  userId    Int
+  // Raffle ID entered
+  raffleId  Int
+  // Timestamp of entry creation
+  createdAt DateTime     @default(now())
+  // Result of the entry (WON, LOST, PENDING)
+  result    RaffleResult
+  // Many-to-One: Raffle entry is linked to one User
+  user      User         @relation(fields: [userId], references: [id])
+  // Many-to-One: Raffle entry is linked to one Raffle
+  raffle    Raffle       @relation(fields: [raffleId], references: [id])
+
+  // Ensure a user can enter a raffle only once
+  @@unique([userId, raffleId])
+}

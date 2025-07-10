@@ -1,0 +1,115 @@
+model User {
+  // Unique identifier for each user
+  id                Int                @id @default(autoincrement())
+  // UUID from Supabase auth.users.id
+  supabaseUserId     String  @unique
+  // User's email address (must be unique)
+  email             String             @unique
+  // User's password (hashed for security)
+  password          String
+  // Role of the user (e.g., admin, regular user)
+  role              Role               @default(USER)
+  // Status of the user (e.g. active, muted)
+  status UserStatus
+  // Unique username for the user
+  username          String             @unique
+  // Timestamp for when the user account was created
+  createdAt         DateTime           @default(now())
+  // URL to the user's profile picture (optional)
+  profilePicture    String?
+  // Short biography or description of the user (optional)
+  bio               String?
+  // User's location (optional)
+  location          String?
+  // Timestamp for the user's last activity (optional)
+  lastActive        DateTime?
+  // Average rating based on reviews (0 to 100)
+  averageRating     Float?             @default(0)
+  // Count of ratings received
+  ratingCount       Int?               @default(0)
+  // One-to-Many: One user can list many products
+  products          Product[]
+  // Many-to-Many: One user can favorite many products 
+  favorites         Product[]          @relation("Favorites")
+  // Many-to-Many: One user can view many products 
+  viewedProducts    Product[]          @relation("ViewedProducts")
+  // One-to-Many: One user can have many search history records 
+  searchHistory     SearchHistory[]
+  // One-to-Many: One user can enter many raffles 
+  enteredRaffles    RaffleEntry[]
+  // One-to-Many: One user can receive many notifications 
+  notifications     Notification[]
+  // One-to-Many: One user can give many ratings 
+  ratingsGiven      UserRating[]       @relation("RatingsGiven")
+  // One-to-Many: One user can receive many ratings 
+  ratingsReceived   UserRating[]       @relation("RatingsReceived")
+  // One-to-Many: One user can send many messages 
+  sentMessages      Message[]          @relation("Sender")
+  // One-to-Many: One user can receive many messages 
+  receivedMessages  Message[]          @relation("Receiver")
+  // One-to-Many: One user can give many reactions to messages 
+  reactions         MessageReaction[]
+  // One-to-Many: One user can have a wishlist of many products 
+  wishlist          Wishlist[]
+  // One-to-Many: One user can write many reviews 
+  reviews           Review[]
+  // One-to-Many: One user can have multiple search filters 
+  searchFilter      SearchFilter[]
+  // One-to-Many: One user can save multiple searches 
+  savedSearch       SavedSearch[]
+  // One-to-Many: One user can file many reports 
+  report            Report[]
+  // One-to-Many: One user can have many activity records 
+  userActivity      UserActivity[]
+  // One-to-Many: One user can have multiple preferences 
+  userPreferences   UserPreference[]
+  // One-to-Many: One user can make multiple moderation reports 
+  moderationReports ModerationReport[]
+  // One-to-Many: One user can have many engagement metrics 
+  engagementMetrics EngagementMetric[]
+  // Many-to-Many: One user can follow many users 
+  following         UserFollow[]       @relation("UserFollows")
+  // Many-to-Many: One user can be followed by many users 
+  followers         UserFollow[]       @relation("UserFollowedBy")
+  // One-to-Many: One user can start many discussion threads 
+  threads           Thread[]
+  // One-to-Many: One user can create many posts 
+  posts             Post[]
+  // One-to-Many: One user can react to many posts 
+  postReactions     PostReaction[]     @relation("UserPostReactions")
+  // One-to-Many: One user can create many polls 
+  polls             Poll[]
+  // One-to-Many: One user can cast many votes in polls 
+  pollVotes         PollVote[]
+  // One-to-Many: One user can earn many badges 
+  userBadges        UserBadge[]
+  // One-to-Many: One user can submit many support tickets 
+  supportTickets    SupportTicket[]
+  // One-to-Many: One user can make many comments 
+  comments          Comment[]
+  // One-to-Many: One user can give ratings to many products 
+  productRating     ProductRating[]
+  // Many-to-Many: One user can speak many languages 
+  language          Language[]
+  // One-to-Many: One user can achieve many achievements 
+  userAchievements  UserAchievement[]
+  // One-to-Many: One user can have multiple leaderboard entries 
+  leaderboards      Leaderboard[]
+  // One-to-Many: One user can make many purchases 
+  purchases         Purchase[]         @relation("UserPurchases")
+  // One-to-Many: One user can make many sales 
+  sales             Sale[]             @relation("UserSales")
+  // One-to-Many: One user can create many product flags 
+  productFlags      ProductFlag[]      @relation("UserProductFlags")
+  // Indicates if the product was added by an admin (optional)
+  addedByAdmin      Boolean            @default(false)
+  // One-to-Many: One user can have many mentions 
+  mentions          Mention[]          @relation("UserMentions")
+ // One-to-Many: One user can have many friends 
+  friends          UserFriend[]       @relation("UserFriends") 
+  // One-to-Many: One user can receive many friend requests 
+  friendOf         UserFriend[]       @relation("UserFriendOf") 
+
+  // Ensures username and email are unique
+  @@unique([username, email])
+}

@@ -1,0 +1,26 @@
+model Review {
+  // Unique ID for the review (Primary Key)
+  id         Int      @id @default(autoincrement())
+  // Foreign key to the Product being reviewed
+  productId  Int
+  // Foreign key to the User who wrote the review
+  userId     Int
+  // Percentage score provided by the user (0 to 100)
+  percentage Float // Feedback score from 0% to 100%
+  // Review content
+  content    String
+  // Timestamp of when the review was created
+  createdAt  DateTime @default(now())
+  // Timestamp of when the review was last updated
+  updatedAt  DateTime @updatedAt
+  // Array of image URLs uploaded with the review
+  imageUrls  String[]
+
+  // Many-to-One: Many Reviews can belong to one Product
+  product Product @relation(fields: [productId], references: [id])
+  // Many-to-One: Many Reviews can belong to one User
+  user    User    @relation(fields: [userId], references: [id])
+
+  // Ensure a user can only review a product once
+  @@unique([productId, userId])
+}

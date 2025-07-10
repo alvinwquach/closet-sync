@@ -1,0 +1,12 @@
+model Category {
+  // Unique ID for the category (Primary Key)
+  id          Int               @id @default(autoincrement())
+  // The name of the category (e.g., Electronics, Clothing)
+  name        String
+  // A brief description of the category, optional
+  description String?
+  // One-to-Many: A category can contain many products
+  products    ProductCategory[]
+  // One-to-Many: A category can contain many threads
+  threads     ThreadCategory[] @relation("CategoryToThread")
+}

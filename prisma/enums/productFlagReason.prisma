@@ -1,0 +1,36 @@
+// Enum ProductFlagReason represents the reasons a product might be flagged
+enum ProductFlagReason {
+  FAKE // Product is counterfeit
+  NOT_AS_DESCRIBED // Product does not match the description provided
+  INAPPROPRIATE_CONTENT // Content is offensive or inappropriate
+  SPAM // Listing is considered spam
+  COPYRIGHT_INFRINGEMENT // Product violates copyright laws
+  IMPERSONATION // Seller falsely represents a brand
+  ALTERED_IMAGES // Product images have been digitally altered
+  COUNTERFEIT_LABELS // Product displays fake branding
+  SUSPICIOUSLY_LOW_PRICE // Unusually low price raises suspicion
+  BAD_REVIEWS // Multiple negative reviews about authenticity
+  UNVERIFIABLE_CLAIMS // Claims made by the seller are unverifiable
+  LACK_OF_AUTHENTICITY // Seller cannot provide proof of authenticity
+  UNAUTHORIZED_RESELLER // Seller is not an authorized reseller for the brand
+  FAKE_REVIEWS // Product has numerous fabricated reviews
+  LIMITED_SUPPLY // Misleading claims of being in short supply
+  EXCESSIVE_RETURNS // High return rate due to counterfeiting
+  DISCONTINUED_MODEL // Selling of a discontinued model
+  MISMATCHED_SERIAL_NUMBERS // Serial numbers do not match expected values
+  INCONSISTENT_BRANDING // Branding or packaging inconsistencies
+  LACK_OF_WARRANTY // No valid warranty provided
+  UNRELIABLE_SELLER_HISTORY // Seller has a history of complaints
+  REPRODUCTION_LABELS // Being sold as original when it's a reproduction
+  UNAUTHENTIC_MATERIALS // Made from materials that do not match the description
+  UNRELIABLE_SIZE_CHART // Size chart does not match actual sizing
+  INACCURATE_COLOR_REPRESENTATION // Color differs from images shown
+  DISREPUTED_BRAND // Brand has a history of authenticity complaints
+  UNAUTHORIZED_CUSTOMIZATION // Customized in a way not sanctioned by the brand
+  SEASONALITY_ISSUES // Sold out of season, raising authenticity suspicions
+  MISSING_CERTIFICATION // Should have certifications but does not provide proof
+  BULK_RESALE_SCAM // Part of a bulk resale scam
+  FAKE_OR_MISLEADING_ENDORSEMENTS // Claims endorsements that are not genuine
+  COMPROMISED_PACKAGING // Packaging shows signs of tampering
+  OTHER // Any other reason not specified
+}

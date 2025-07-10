@@ -1,0 +1,12 @@
+model Language {
+  // Unique ID for the language (Primary Key)
+  id     Int    @id @default(autoincrement())
+  // Language code (e.g., 'en', 'fr', 'es')
+  code   String
+  // Full name of the language
+  name   String
+  // Foreign key for the user
+  userId Int
+  // One Language can be preferred by many Users
+  user   User   @relation(fields: [userId], references: [id])
+}

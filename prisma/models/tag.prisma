@@ -1,0 +1,11 @@
+model Tag {
+  // Unique ID for the tag (Primary Key)
+  id       Int          @id @default(autoincrement())
+  // Name of the tag
+  name     String
+  // One Tag can be associated with many ProductTags
+  products ProductTag[] @relation("ProductTags")
+
+  // Ensure each tag name is unique
+  @@unique(name)
+}
