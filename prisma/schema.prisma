@@ -6,6 +6,7 @@
 // Generator for Prisma Client
 generator client {
   provider = "prisma-client-js" // Generates Prisma Client for database operations
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 // Data source configuration
